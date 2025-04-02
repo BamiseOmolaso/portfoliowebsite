@@ -11,4 +11,5 @@ export const ratelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(5, '1 h'), // 5 requests per hour
   analytics: true,
   prefix: 'contact-form',
+  ephemeralCache: new Map(), // Add in-memory cache for better performance
 }); 

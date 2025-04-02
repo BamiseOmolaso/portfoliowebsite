@@ -6,11 +6,13 @@ import { sendContactEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
-    // Rate limiting
+    // Get client IP from headers
     const headersList = await headers();
     const ip = headersList.get('x-forwarded-for') || 'anonymous';
-    const { success, limit, reset, remaining } = await ratelimit.limit(ip);
 
+    // Apply rate limiting
+    const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+    
     if (!success) {
       return NextResponse.json(
         {
@@ -19,11 +21,20 @@ export async function POST(request: Request) {
           reset,
           remaining,
         },
-        { status: 429 }
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': limit.toString(),
+            'X-RateLimit-Remaining': remaining.toString(),
+            'X-RateLimit-Reset': reset.toString(),
+          }
+        }
       );
     }
 
-    const { name, email, subject, message } = await request.json();
+    // Parse request body
+    const body = await request.json();
+    const { name, email, subject, message } = body;
 
     // Validate input
     if (!name || !email || !subject || !message) {
@@ -58,7 +69,14 @@ export async function POST(request: Request) {
         reset,
         remaining,
       },
-      { status: 201 }
+      { 
+        status: 201,
+        headers: {
+          'X-RateLimit-Limit': limit.toString(),
+          'X-RateLimit-Remaining': remaining.toString(),
+          'X-RateLimit-Reset': reset.toString(),
+        }
+      }
     );
   } catch (error) {
     console.error('Error processing contact form:', error);
