@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
-
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(3, '1 m'),
-  analytics: true,
-});
+import pool from '@/lib/db';
+import { ratelimit } from '@/lib/rate-limit';
+import { sendContactEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -18,40 +13,57 @@ export async function POST(request: Request) {
 
     if (!success) {
       return NextResponse.json(
-        { error: 'Too many requests. Please try again later.' },
+        {
+          error: 'Too many requests. Please try again later.',
+          limit,
+          reset,
+          remaining,
+        },
         { status: 429 }
       );
     }
 
-    const { name, email, message } = await request.json();
+    const { name, email, subject, message } = await request.json();
 
-    // Basic validation
-    if (!name || !email || !message) {
+    // Validate input
+    if (!name || !email || !subject || !message) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
       );
     }
 
-    // Email validation
+    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
-        { error: 'Please enter a valid email address' },
+        { error: 'Invalid email format' },
         { status: 400 }
       );
     }
 
-    // Here you would typically send the email using your email service
-    // For now, we'll just return a success response
+    // Insert into database
+    const [result] = await pool.execute(
+      'INSERT INTO contact_messages (name, email, subject, message, created_at) VALUES (?, ?, ?, ?, NOW())',
+      [name, email, subject, message]
+    );
+
+    // Send email notification
+    await sendContactEmail({ name, email, subject, message });
+
     return NextResponse.json(
-      { message: 'Message sent successfully!' },
-      { status: 200 }
+      { 
+        message: 'Message sent successfully',
+        limit,
+        reset,
+        remaining,
+      },
+      { status: 201 }
     );
   } catch (error) {
-    console.error('Contact form error:', error);
+    console.error('Error processing contact form:', error);
     return NextResponse.json(
-      { error: 'Something went wrong. Please try again later.' },
+      { error: 'Failed to send message' },
       { status: 500 }
     );
   }
