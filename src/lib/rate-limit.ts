@@ -1,16 +1,22 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-interface RateLimitConfig {
+interface RateLimiterConfig {
   maxRequests: number;
   windowMs: number;
 }
 
+interface RateLimitResult {
+  success: boolean;
+  remaining: number;
+  resetTime: number;
+}
+
 class RateLimiter {
   private requests: Map<string, { count: number; resetTime: number }>;
-  private config: RateLimitConfig;
+  public config: RateLimiterConfig;
 
-  constructor(config: RateLimitConfig) {
+  constructor(config: RateLimiterConfig) {
     this.requests = new Map();
     this.config = config;
   }
@@ -18,57 +24,54 @@ class RateLimiter {
   private cleanup() {
     const now = Date.now();
     for (const [key, value] of this.requests.entries()) {
-      if (value.resetTime < now) {
+      if (value.resetTime <= now) {
         this.requests.delete(key);
       }
     }
   }
 
-  public check(identifier: string): { allowed: boolean; remaining: number; resetTime: number } {
+  check(key: string): RateLimitResult {
     this.cleanup();
-
     const now = Date.now();
-    const requestData = this.requests.get(identifier);
+    const request = this.requests.get(key);
 
-    if (!requestData) {
-      this.requests.set(identifier, {
+    if (!request) {
+      this.requests.set(key, {
         count: 1,
         resetTime: now + this.config.windowMs,
       });
       return {
-        allowed: true,
+        success: true,
         remaining: this.config.maxRequests - 1,
         resetTime: now + this.config.windowMs,
       };
     }
 
-    if (now > requestData.resetTime) {
-      this.requests.set(identifier, {
+    if (request.resetTime <= now) {
+      this.requests.set(key, {
         count: 1,
         resetTime: now + this.config.windowMs,
       });
       return {
-        allowed: true,
+        success: true,
         remaining: this.config.maxRequests - 1,
         resetTime: now + this.config.windowMs,
       };
     }
 
-    if (requestData.count >= this.config.maxRequests) {
+    if (request.count >= this.config.maxRequests) {
       return {
-        allowed: false,
+        success: false,
         remaining: 0,
-        resetTime: requestData.resetTime,
+        resetTime: request.resetTime,
       };
     }
 
-    requestData.count++;
-    this.requests.set(identifier, requestData);
-
+    request.count++;
     return {
-      allowed: true,
-      remaining: this.config.maxRequests - requestData.count,
-      resetTime: requestData.resetTime,
+      success: true,
+      remaining: this.config.maxRequests - request.count,
+      resetTime: request.resetTime,
     };
   }
 }
@@ -97,7 +100,7 @@ export function withRateLimit(
   return async (req: NextRequest) => {
     const result = limiter.check(identifier);
 
-    if (!result.allowed) {
+    if (!result.success) {
       return new NextResponse(
         JSON.stringify({
           error: 'Too many requests',
