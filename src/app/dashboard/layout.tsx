@@ -37,6 +37,26 @@ export default function DashboardLayout({
               >
                 Newsletter Subscribers
               </Link>
+              <Link
+                href="/dashboard/blog"
+                className={`flex items-center px-4 py-2 text-sm font-medium rounded-md ${
+                  pathname.startsWith('/dashboard/blog')
+                    ? 'bg-gray-800 text-white'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`}
+              >
+                Blog Posts
+              </Link>
+              <Link
+                href="/dashboard/projects"
+                className={`flex items-center px-4 py-2 text-sm font-medium rounded-md ${
+                  pathname.startsWith('/dashboard/projects')
+                    ? 'bg-gray-800 text-white'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`}
+              >
+                Projects
+              </Link>
             </nav>
           </div>
 
