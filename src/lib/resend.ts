@@ -22,7 +22,7 @@ export async function sendWelcomeEmail(email: string, name?: string) {
           </p>
           <p style="font-size: 16px; line-height: 1.5; color: #333; margin-top: 20px;">
             Best regards,<br>
-            Your Name
+            Oluwabamise Omolaso
           </p>
         </div>
       `,

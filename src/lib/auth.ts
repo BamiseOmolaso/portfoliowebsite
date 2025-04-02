@@ -23,7 +23,7 @@ export async function checkAuth() {
         },
         remove(name: string, options: any) {
           try {
-            cookieStore.delete(name, options);
+            cookieStore.delete(name, { ...options, value: '', expires: new Date(0) });
           } catch (error) {
             console.error('Error removing cookie:', error);
           }
