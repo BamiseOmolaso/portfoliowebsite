@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
-const supabase = createClient(
+const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
@@ -14,9 +14,9 @@ interface PerformanceMetrics {
   serverResponse: number;
   domProcessing: number;
   pageLoad: number;
-  firstContentfulPaint: number;
-  largestContentfulPaint: number;
-  firstInputDelay: number;
+  domContentLoaded: number;
+  domInteractive: number;
+  loadEventEnd: number;
 }
 
 interface LCPMetrics {
@@ -32,6 +32,8 @@ export default function PerformanceDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     async function fetchMetrics() {
       try {
         const { data: performanceData, error: perfError } = await supabase
@@ -50,16 +52,26 @@ export default function PerformanceDashboard() {
           throw new Error(perfError?.message || lcpError?.message);
         }
 
-        setMetrics(performanceData.map(item => item.metrics));
-        setLcpMetrics(lcpData);
+        if (mounted) {
+          setMetrics(performanceData.map(item => item.metrics));
+          setLcpMetrics(lcpData);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch metrics');
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch metrics');
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchMetrics();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   if (loading) {
@@ -85,9 +97,9 @@ export default function PerformanceDashboard() {
                 <p>Server Response: {metric.serverResponse}ms</p>
                 <p>DOM Processing: {metric.domProcessing}ms</p>
                 <p>Page Load: {metric.pageLoad}ms</p>
-                <p>First Contentful Paint: {metric.firstContentfulPaint}ms</p>
-                <p>Largest Contentful Paint: {metric.largestContentfulPaint}ms</p>
-                <p>First Input Delay: {metric.firstInputDelay}ms</p>
+                <p>DOM Content Loaded: {metric.domContentLoaded}ms</p>
+                <p>DOM Interactive: {metric.domInteractive}ms</p>
+                <p>Load Event End: {metric.loadEventEnd}ms</p>
               </div>
             ))}
           </div>

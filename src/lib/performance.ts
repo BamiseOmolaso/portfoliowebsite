@@ -9,9 +9,9 @@ export function measurePerformance() {
       serverResponse: timing.responseEnd - timing.requestStart,
       domProcessing: timing.domComplete - timing.domLoading,
       pageLoad: timing.loadEventEnd - timing.navigationStart,
-      firstContentfulPaint: navigation.firstContentfulPaint,
-      largestContentfulPaint: navigation.largestContentfulPaint,
-      firstInputDelay: navigation.firstInputDelay,
+      domContentLoaded: timing.domContentLoadedEventEnd - timing.navigationStart,
+      domInteractive: timing.domInteractive - timing.navigationStart,
+      loadEventEnd: timing.loadEventEnd - timing.navigationStart,
     };
 
     // Send metrics to your analytics service

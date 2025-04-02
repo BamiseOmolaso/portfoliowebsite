@@ -3,11 +3,15 @@
 import { useEffect } from 'react';
 import { measurePerformance, startPerformanceObserver } from '@/lib/performance';
 
-export function PerformanceMonitor() {
+export function PerformanceMonitor(): null {
   useEffect(() => {
-    // Start performance monitoring
-    measurePerformance();
-    startPerformanceObserver();
+    try {
+      // Start performance monitoring
+      measurePerformance();
+      startPerformanceObserver();
+    } catch (error) {
+      console.error('Error in performance monitoring:', error);
+    }
 
     // Cleanup
     return () => {
