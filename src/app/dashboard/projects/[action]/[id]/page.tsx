@@ -5,13 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import DOMPurify from 'dompurify';
-import 'react-quill/dist/quill.snow.css';
-
-// Dynamically import ReactQuill with no SSR
-const ReactQuill = dynamic(() => import('react-quill'), {
-  ssr: false,
-  loading: () => <p>Loading editor...</p>,
-});
+import Editor from '@/app/components/Editor';
 
 interface Project {
   id?: string;
@@ -179,14 +173,10 @@ export default function ProjectForm({
             <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
               Description
             </label>
-            <textarea
-              id="description"
-              name="description"
-              value={project.description}
-              onChange={handleChange}
-              required
-              rows={3}
-              className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            <Editor
+              content={project.description}
+              onChange={(newContent) => setProject((prev) => ({ ...prev, description: newContent }))}
+              placeholder="Write your project description here..."
             />
           </div>
 
@@ -276,10 +266,10 @@ export default function ProjectForm({
               Content
             </label>
             <div className="bg-white">
-              <ReactQuill
-                value={project.content}
+              <Editor
+                content={project.content}
                 onChange={handleContentChange}
-                className="h-96 mb-12"
+                placeholder="Write your project content here..."
               />
             </div>
           </div>

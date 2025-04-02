@@ -5,13 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import DOMPurify from 'dompurify';
-import 'react-quill/dist/quill.snow.css';
-
-// Dynamically import ReactQuill with no SSR
-const ReactQuill = dynamic(() => import('react-quill'), {
-  ssr: false,
-  loading: () => <p>Loading editor...</p>,
-});
+import Editor from '@/app/components/Editor';
 
 interface BlogPost {
   id?: string;
@@ -169,10 +163,10 @@ export default function BlogPostForm({
               Content
             </label>
             <div className="bg-white">
-              <ReactQuill
-                value={post.content}
-                onChange={handleContentChange}
-                className="h-96 mb-12"
+              <Editor
+                content={post.content}
+                onChange={(newContent) => setPost((prev) => ({ ...prev, content: newContent }))}
+                placeholder="Write your blog post here..."
               />
             </div>
           </div>

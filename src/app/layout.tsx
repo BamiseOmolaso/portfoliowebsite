@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { PerformanceMonitor } from './components/PerformanceMonitor';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,14 +19,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} bg-gray-950 text-white min-h-screen`}>
-        <PerformanceMonitor />
-        <Header />
-        <main className="pt-16">
-          {children}
-        </main>
-        <Footer />
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <body className={`${inter.className} bg-gray-950 text-white min-h-screen`} suppressHydrationWarning>
+        <ErrorBoundary>
+          <PerformanceMonitor />
+          <Header />
+          <main className="pt-16" suppressHydrationWarning>
+            {children}
+          </main>
+          <Footer />
+        </ErrorBoundary>
       </body>
     </html>
   );

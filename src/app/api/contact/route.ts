@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { withRateLimit, contactFormLimiter } from '@/lib/rate-limit';
@@ -27,18 +27,7 @@ export const POST = withRateLimit(
         );
       }
 
-      const cookieStore = cookies();
-      const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            get(name: string) {
-              return cookieStore.get(name)?.value;
-            },
-          },
-        }
-      );
+      const supabase = createServerComponentClient({ cookies });
 
       // Insert the message into the contact_messages table
       const { error } = await supabase
