@@ -14,7 +14,7 @@ const ReactQuill = dynamic(() => import('react-quill'), {
 });
 
 interface Project {
-  id: string;
+  id?: string;
   title: string;
   slug: string;
   description: string;

@@ -14,7 +14,7 @@ const ReactQuill = dynamic(() => import('react-quill'), {
 });
 
 interface BlogPost {
-  id: string;
+  id?: string;
   title: string;
   slug: string;
   content: string;
