@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 interface Props {
@@ -20,26 +22,21 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log error to console for development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Error caught by boundary:', error, errorInfo);
-    }
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-950">
-          <div className="text-center p-8">
-            <h2 className="text-2xl font-bold text-red-500 mb-4">
-              Something went wrong
-            </h2>
-            <p className="text-gray-300 mb-4">
-              We apologize for the inconvenience. Please try again later.
+        <div className="min-h-screen bg-gray-950 p-8">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl font-bold text-white mb-4">Something went wrong</h1>
+            <p className="text-gray-400 mb-4">
+              {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
             >
               Try again
             </button>

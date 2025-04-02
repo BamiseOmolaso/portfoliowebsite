@@ -11,17 +11,42 @@ export async function checkAuth() {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value;
+          const cookie = cookieStore.get(name);
+          return cookie?.value;
+        },
+        set(name: string, value: string, options: any) {
+          try {
+            cookieStore.set(name, value, options);
+          } catch (error) {
+            console.error('Error setting cookie:', error);
+          }
+        },
+        remove(name: string, options: any) {
+          try {
+            cookieStore.delete(name, options);
+          } catch (error) {
+            console.error('Error removing cookie:', error);
+          }
         },
       },
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
 
-  if (!session) {
+    if (error) {
+      console.error('Auth error:', error);
+      redirect('/login');
+    }
+
+    if (!session) {
+      redirect('/login');
+    }
+
+    return session;
+  } catch (error) {
+    console.error('Session check error:', error);
     redirect('/login');
   }
-
-  return session;
 } 

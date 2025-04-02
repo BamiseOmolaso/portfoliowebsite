@@ -1,10 +1,7 @@
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import { PerformanceMonitor } from './components/PerformanceMonitor';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { ClientWrapper } from './components/ClientWrapper';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,14 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={`${inter.className} bg-gray-950 text-white min-h-screen`} suppressHydrationWarning>
-        <ErrorBoundary>
-          <PerformanceMonitor />
-          <Header />
-          <main className="pt-16" suppressHydrationWarning>
-            {children}
-          </main>
-          <Footer />
-        </ErrorBoundary>
+        <ClientWrapper>
+          {children}
+        </ClientWrapper>
       </body>
     </html>
   );

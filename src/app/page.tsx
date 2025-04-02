@@ -144,8 +144,8 @@ export default function Home() {
               >
                 <a
                   href={`https://www.youtube.com/watch?v=${video.videoId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
                   className="block relative aspect-video bg-gray-900"
                 >
                   <div className="absolute inset-0 flex items-center justify-center bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
@@ -158,7 +158,7 @@ export default function Home() {
                     </svg>
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60"></div>
-                  <Image
+          <Image
                     src={getThumbnailUrl(video.videoId)}
                     alt={video.title}
                     fill
@@ -185,8 +185,8 @@ export default function Home() {
           <div className="text-center mt-12">
             <a
               href="https://www.youtube.com/@bamiseteachescloud/videos"
-              target="_blank"
-              rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
               className="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition-colors"
             >
               <svg

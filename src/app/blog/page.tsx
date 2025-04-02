@@ -1,41 +1,61 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
+import { createBrowserClient } from '@supabase/ssr';
 
-const blogPosts = [
-  {
-    id: 1,
-    title: 'Healthcare Data Science: Trends and Insights',
-    excerpt: 'Exploring the latest trends in healthcare data science and their impact on patient care.',
-    date: '2024-03-15',
-    category: 'Healthcare',
-    imageUrl: '/images/blog/healthcare-data.jpg',
-    slug: 'healthcare-data-science-trends',
-  },
-  {
-    id: 2,
-    title: 'Cloud Architecture Best Practices',
-    excerpt: 'Essential best practices for designing scalable and secure cloud architectures.',
-    date: '2024-03-10',
-    category: 'Cloud Computing',
-    imageUrl: '/images/blog/cloud-architecture.jpg',
-    slug: 'cloud-architecture-best-practices',
-  },
-  {
-    id: 3,
-    title: 'AI in Medical Diagnosis',
-    excerpt: 'How artificial intelligence is revolutionizing medical diagnosis and treatment planning.',
-    date: '2024-03-05',
-    category: 'AI & Healthcare',
-    imageUrl: '/images/blog/ai-medical.jpg',
-    slug: 'ai-in-medical-diagnosis',
-  },
-  // Add more blog posts as needed
-];
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  created_at: string;
+  published: boolean;
+}
 
 const BlogPage = () => {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setPosts(data || []);
+    } catch (err) {
+      console.error('Error fetching blog posts:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">Loading...</h1>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -52,12 +72,12 @@ const BlogPage = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {blogPosts.map((post) => (
+          {posts.map((post) => (
             <motion.article
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: post.id * 0.1 }}
+              transition={{ duration: 0.5 }}
               className="bg-gray-900 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300"
             >
               <div className="relative h-48 bg-gray-800">
@@ -66,10 +86,12 @@ const BlogPage = () => {
                   <span className="text-4xl text-purple-400 opacity-50">Blog</span>
                 </div>
               </div>
+              
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-purple-400">{post.category}</span>
-                  <span className="text-sm text-gray-400">{post.date}</span>
+                  <span className="text-sm text-purple-400">
+                    {new Date(post.created_at).toLocaleDateString()}
+                  </span>
                 </div>
                 <h2 className="text-xl font-semibold mb-2 text-white">{post.title}</h2>
                 <p className="text-gray-400 mb-4">{post.excerpt}</p>
