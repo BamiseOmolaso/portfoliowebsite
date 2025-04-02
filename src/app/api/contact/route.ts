@@ -1,42 +1,12 @@
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
-import pool from '@/lib/db';
-import { ratelimit } from '@/lib/rate-limit';
-import { sendContactEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
-    // Get client IP from headers
-    const headersList = await headers();
-    const ip = headersList.get('x-forwarded-for') || 'anonymous';
+    const { name, email, subject, message } = await request.json();
 
-    // Apply rate limiting
-    const { success, limit, reset, remaining } = await ratelimit.limit(ip);
-    
-    if (!success) {
-      return NextResponse.json(
-        {
-          error: 'Too many requests. Please try again later.',
-          limit,
-          reset,
-          remaining,
-        },
-        { 
-          status: 429,
-          headers: {
-            'X-RateLimit-Limit': limit.toString(),
-            'X-RateLimit-Remaining': remaining.toString(),
-            'X-RateLimit-Reset': reset.toString(),
-          }
-        }
-      );
-    }
-
-    // Parse request body
-    const body = await request.json();
-    const { name, email, subject, message } = body;
-
-    // Validate input
+    // Validate required fields
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
         { error: 'All fields are required' },
@@ -53,35 +23,47 @@ export async function POST(request: Request) {
       );
     }
 
-    // Insert into database
-    const [result] = await pool.execute(
-      'INSERT INTO contact_messages (name, email, subject, message, created_at) VALUES (?, ?, ?, ?, NOW())',
-      [name, email, subject, message]
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+        },
+      }
     );
 
-    // Send email notification
-    await sendContactEmail({ name, email, subject, message });
+    // Insert the message into the contact_messages table
+    const { error } = await supabase
+      .from('contact_messages')
+      .insert([
+        {
+          name,
+          email,
+          subject,
+          message,
+        },
+      ]);
+
+    if (error) {
+      console.error('Error inserting message:', error);
+      return NextResponse.json(
+        { error: 'Failed to send message' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
-      { 
-        message: 'Message sent successfully',
-        limit,
-        reset,
-        remaining,
-      },
-      { 
-        status: 201,
-        headers: {
-          'X-RateLimit-Limit': limit.toString(),
-          'X-RateLimit-Remaining': remaining.toString(),
-          'X-RateLimit-Reset': reset.toString(),
-        }
-      }
+      { message: 'Message sent successfully' },
+      { status: 200 }
     );
   } catch (error) {
     console.error('Error processing contact form:', error);
     return NextResponse.json(
-      { error: 'Failed to send message' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
