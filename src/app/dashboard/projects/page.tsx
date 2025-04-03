@@ -44,9 +44,8 @@ export default function ProjectsPage() {
 
       if (error) throw error;
       setProjects(data || []);
-    } catch (err) {
-      setError('Failed to fetch projects');
-      console.error('Error fetching projects:', err);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch projects');
     } finally {
       setLoading(false);
     }
@@ -60,9 +59,9 @@ export default function ProjectsPage() {
 
       if (error) throw error;
       setProjects(projects.filter(project => project.id !== id));
-    } catch (err) {
-      setError('Failed to delete project');
+    } catch (err: unknown) {
       console.error('Error deleting project:', err);
+      alert(err instanceof Error ? err.message : 'Failed to delete project');
     }
   };
 
@@ -98,8 +97,9 @@ export default function ProjectsPage() {
 
       if (error) throw error;
       fetchProjects(); // Refresh the projects list
-    } catch (err) {
-      setError('Failed to unpublish project');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to unpublish project';
+      setError(errorMessage);
       console.error('Error unpublishing project:', err);
     }
   };

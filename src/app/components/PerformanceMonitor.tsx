@@ -11,50 +11,58 @@ export function PerformanceMonitor() {
     );
 
     // Track LCP
-    const trackLCP = () => {
-      const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
-      const lastEntry = lcpEntries[lcpEntries.length - 1];
+    const trackLCP = async () => {
+      try {
+        const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
+        const lastEntry = lcpEntries[lcpEntries.length - 1];
 
-      if (lastEntry) {
-        supabase
-          .from('lcp_metrics')
-          .insert([
-            {
-              value: lastEntry.startTime,
-              url: window.location.href,
-              user_agent: navigator.userAgent,
-            },
-          ])
-          .then(({ error }) => {
-            if (error) console.error('Error tracking LCP:', error);
-          });
+        if (lastEntry) {
+          const { error } = await supabase
+            .from('lcp_metrics')
+            .insert([
+              {
+                value: lastEntry.startTime,
+                url: window.location.href,
+                user_agent: navigator.userAgent,
+              },
+            ]);
+
+          if (error) throw error;
+        }
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to track LCP metric';
+        console.error('Error tracking LCP:', errorMessage);
       }
     };
 
     // Track other performance metrics
-    const trackPerformance = () => {
-      const metrics = {
-        fcp: performance
-          .getEntriesByType('paint')
-          .find(entry => entry.name === 'first-contentful-paint')?.startTime,
-        ttfb: performance.timing.responseStart - performance.timing.requestStart,
-        domContentLoaded:
-          performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart,
-        load: performance.timing.loadEventEnd - performance.timing.navigationStart,
-      };
+    const trackPerformance = async () => {
+      try {
+        const metrics = {
+          fcp: performance
+            .getEntriesByType('paint')
+            .find(entry => entry.name === 'first-contentful-paint')?.startTime,
+          ttfb: performance.timing.responseStart - performance.timing.requestStart,
+          domContentLoaded:
+            performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart,
+          load: performance.timing.loadEventEnd - performance.timing.navigationStart,
+        };
 
-      supabase
-        .from('performance_metrics')
-        .insert([
-          {
-            metrics,
-            url: window.location.href,
-            user_agent: navigator.userAgent,
-          },
-        ])
-        .then(({ error }) => {
-          if (error) console.error('Error tracking performance:', error);
-        });
+        const { error } = await supabase
+          .from('performance_metrics')
+          .insert([
+            {
+              metrics,
+              url: window.location.href,
+              user_agent: navigator.userAgent,
+            },
+          ]);
+
+        if (error) throw error;
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to track performance metrics';
+        console.error('Error tracking performance:', errorMessage);
+      }
     };
 
     // Set up observers

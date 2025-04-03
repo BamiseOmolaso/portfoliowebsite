@@ -2,6 +2,8 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { createClient } from '@supabase/supabase-js';
+import DOMPurify from 'isomorphic-dompurify';
 
 export async function POST(request: Request) {
   try {
@@ -83,7 +85,7 @@ export async function POST(request: Request) {
     // Send emails to all subscribers
     for (const subscriber of subscribers) {
       try {
-        // Check if newsletter_sends record already exists
+        // Check if we've already sent this newsletter to this subscriber
         const { data: existingSend } = await supabase
           .from('newsletter_sends')
           .select('id')
@@ -92,55 +94,64 @@ export async function POST(request: Request) {
           .single();
 
         if (existingSend) {
-          console.log(`Newsletter already sent to ${subscriber.email}, skipping...`);
+          console.log(`Newsletter already sent to ${subscriber.email}`);
           continue;
         }
 
-        // Create newsletter_sends record
+        // Sanitize HTML content
+        const sanitizedHtml = DOMPurify.sanitize(newsletter.content || '<p>No content available</p>', {
+          ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a'],
+          ALLOWED_ATTR: ['href', 'target', 'rel'],
+        });
+
+        // Create plain text version
+        const plainText = sanitizedHtml
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<\/p>/gi, '\n\n')
+          .replace(/<[^>]*>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .trim();
+
+        // Send email
+        const { data: emailData, error: emailError } = await resend.emails.send({
+          from: 'Bamise Omolaso <davidbams3@gmail.com>',
+          to: subscriber.email,
+          subject: newsletter.subject,
+          html: sanitizedHtml,
+          text: plainText,
+        });
+
+        if (emailError) {
+          throw emailError;
+        }
+
+        // Record the send
         const { error: sendError } = await supabase.from('newsletter_sends').insert([
           {
             newsletter_id: newsletterId,
             subscriber_id: subscriber.id,
-            status: 'pending',
+            status: 'sent',
+            sent_at: new Date().toISOString(),
           },
         ]);
 
-        if (sendError) throw sendError;
-
-        // Send the email with Resend
-        const { data, error } = await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || 'newsletter@resend.dev',
-          to: subscriber.email,
-          subject: newsletter.subject,
-          html: newsletter.content || '<p>No content available</p>',
-          text: newsletter.content.replace(/<[^>]*>/g, ''),
-          // Add tracking and analytics
-          headers: {
-            'X-Entity-Ref-ID': newsletterId,
-          },
-        });
-
-        if (error) {
-          throw error;
+        if (sendError) {
+          throw sendError;
         }
-
-        // Update newsletter_sends status
-        await supabase
-          .from('newsletter_sends')
-          .update({ status: 'sent' })
-          .eq('newsletter_id', newsletterId)
-          .eq('subscriber_id', subscriber.id);
-      } catch (err) {
-        console.error(`Failed to send to ${subscriber.email}:`, err);
-        // Update newsletter_sends status with error
-        await supabase
-          .from('newsletter_sends')
-          .update({
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to send email';
+        console.error(`Error sending to ${subscriber.email}:`, errorMessage);
+        
+        // Record the failed send
+        await supabase.from('newsletter_sends').insert([
+          {
+            newsletter_id: newsletterId,
+            subscriber_id: subscriber.id,
             status: 'failed',
-            error_message: err instanceof Error ? err.message : 'Unknown error',
-          })
-          .eq('newsletter_id', newsletterId)
-          .eq('subscriber_id', subscriber.id);
+            error: errorMessage,
+            sent_at: new Date().toISOString(),
+          },
+        ]);
       }
     }
 
@@ -154,8 +165,11 @@ export async function POST(request: Request) {
       .eq('id', newsletterId);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error sending newsletter:', error);
-    return NextResponse.json({ error: 'Failed to send newsletter' }, { status: 500 });
+  } catch (err: unknown) {
+    console.error('Error sending newsletter:', err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Failed to send newsletter' },
+      { status: 500 }
+    );
   }
 }

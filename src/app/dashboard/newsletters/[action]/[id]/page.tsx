@@ -49,9 +49,12 @@ export default function NewsletterForm({ params }: { params: { action: string; i
       if (data.scheduled_for) {
         setShowSchedule(true);
       }
-    } catch (err) {
-      setError('Failed to fetch newsletter');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch newsletter';
+      setError(errorMessage);
       console.error('Error fetching newsletter:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,19 +64,34 @@ export default function NewsletterForm({ params }: { params: { action: string; i
     setError(null);
 
     try {
+      // Validate required fields
+      if (!newsletter.subject || !newsletter.content) {
+        throw new Error('Subject and content are required');
+      }
+
+      const newsletterData = {
+        ...newsletter,
+        updated_at: new Date().toISOString(),
+        created_at: params.action === 'new' ? new Date().toISOString() : newsletter.created_at,
+      };
+
       if (params.action === 'new') {
-        const { error } = await supabase.from('newsletters').insert([{ ...newsletter }]);
+        const { error } = await supabase.from('newsletters').insert([newsletterData]);
 
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('newsletters').update(newsletter).eq('id', params.id);
+        const { error } = await supabase
+          .from('newsletters')
+          .update(newsletterData)
+          .eq('id', params.id);
 
         if (error) throw error;
       }
 
       router.push('/dashboard/newsletters');
-    } catch (err) {
-      setError('Failed to save newsletter');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save newsletter';
+      setError(errorMessage);
       console.error('Error saving newsletter:', err);
     } finally {
       setLoading(false);

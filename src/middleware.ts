@@ -17,8 +17,8 @@ export async function middleware(request: NextRequest) {
   });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         get(name: string) {
@@ -43,6 +43,9 @@ export async function middleware(request: NextRequest) {
   );
 
   const { data: { session } } = await supabase.auth.getSession();
+
+  // Remove the x-middleware-subrequest-id header
+  response.headers.delete('x-middleware-subrequest-id');
 
   // If the user is not logged in and trying to access a protected route, redirect to login
   if (!session && request.nextUrl.pathname.startsWith('/dashboard')) {

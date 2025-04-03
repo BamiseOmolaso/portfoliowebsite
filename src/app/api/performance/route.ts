@@ -24,8 +24,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error processing performance metrics:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (err: unknown) {
+    console.error('Error processing performance metrics:', err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

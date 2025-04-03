@@ -47,8 +47,10 @@ export default function NewNewsletter() {
 
       if (error) throw error;
       setAvailableTags(data || []);
-    } catch (err) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch tags';
       console.error('Error fetching tags:', err);
+      setError(errorMessage);
     }
   };
 
@@ -62,8 +64,9 @@ export default function NewNewsletter() {
 
       if (insertError) throw insertError;
       router.push('/dashboard/newsletters');
-    } catch (err) {
-      setError('Failed to save newsletter');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save newsletter';
+      setError(errorMessage);
       console.error('Error saving newsletter:', err);
     } finally {
       setLoading(false);
@@ -134,8 +137,9 @@ export default function NewNewsletter() {
       if (updateError) throw updateError;
 
       router.push('/dashboard/newsletters');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send newsletter');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send newsletter';
+      setError(errorMessage);
       console.error('Error sending newsletter:', err);
     } finally {
       setLoading(false);

@@ -51,14 +51,17 @@ export const POST = withRateLimit(apiLimiter, 'newsletter-subscribe', async (req
     // Send welcome email
     try {
       await sendWelcomeEmail(email, name);
-    } catch (emailError) {
-      console.error('Error sending welcome email:', emailError);
+    } catch (err: unknown) {
+      console.error('Welcome email error:', err instanceof Error ? err.message : err);
       // Don't fail the subscription if the welcome email fails
     }
 
     return NextResponse.json({ message: 'Successfully subscribed to newsletter' }, { status: 200 });
-  } catch (error) {
-    console.error('Error processing newsletter subscription:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (err: unknown) {
+    console.error('Subscription error:', err instanceof Error ? err.message : err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Failed to subscribe' },
+      { status: 500 }
+    );
   }
 });

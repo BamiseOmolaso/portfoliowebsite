@@ -103,8 +103,8 @@ export default function LoginPage() {
       }
 
       router.push('/dashboard');
-    } catch (err: Error) {
-      setError(err.message || 'Failed to login');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to login');
     } finally {
       setLoading(false);
     }

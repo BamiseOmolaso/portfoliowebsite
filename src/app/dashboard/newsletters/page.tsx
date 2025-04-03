@@ -38,9 +38,8 @@ export default function NewslettersPage() {
 
       if (error) throw error;
       setNewsletters(data || []);
-    } catch (err) {
-      setError('Failed to fetch newsletters');
-      console.error('Error fetching newsletters:', err);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch newsletters');
     } finally {
       setLoading(false);
     }

@@ -104,16 +104,41 @@ export default function Editor({
   }
 
   const addImage = (): void => {
-    const url = window.prompt('Enter the URL of the image:');
-    if (url) {
+    try {
+      const url = window.prompt('Enter the URL of the image:');
+      if (!url) return;
+
+      // Basic URL validation
+      try {
+        new URL(url);
+      } catch (err) {
+        throw new Error('Please enter a valid URL');
+      }
+
       editor.chain().focus().setImage({ src: url }).run();
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add image';
+      console.error('Error adding image:', err);
+      alert(errorMessage);
     }
   };
 
   const addLink = (): void => {
-    const url = window.prompt('Enter the URL:');
-    if (url) {
+    try {
+      const url = window.prompt('Enter the URL:');
+      if (!url) return;
+
+      // Basic URL validation
+      try {
+        new URL(url);
+      } catch (err) {
+        throw new Error('Please enter a valid URL');
+      }
+
       editor.chain().focus().setLink({ href: url }).run();
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add link';
+      console.error('Error adding link:', err);
     }
   };
 

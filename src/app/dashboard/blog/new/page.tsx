@@ -37,6 +37,11 @@ export default function NewBlogPost() {
     setError(null);
 
     try {
+      // Validate required fields
+      if (!post.title || !post.slug || !post.content) {
+        throw new Error('Title, slug, and content are required');
+      }
+
       const { error } = await supabase
         .from('blog_posts')
         .insert([
@@ -50,8 +55,9 @@ export default function NewBlogPost() {
 
       if (error) throw error;
       router.push('/dashboard/blog');
-    } catch (err) {
-      setError('Failed to save blog post');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save blog post';
+      setError(errorMessage);
       console.error('Error saving blog post:', err);
     } finally {
       setLoading(false);

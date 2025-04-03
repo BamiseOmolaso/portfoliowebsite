@@ -71,7 +71,7 @@ export default function BlogPostForm({ params }: { params: { action: string; id:
         }
 
         console.log('Supabase connection successful!');
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Connection test error:', err);
         setError('Connection test error: ' + (err instanceof Error ? err.message : String(err)));
       }
@@ -90,9 +90,12 @@ export default function BlogPostForm({ params }: { params: { action: string; id:
 
       if (error) throw error;
       setPost(data);
-    } catch (err) {
-      setError('Failed to fetch post');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch post';
+      setError(errorMessage);
       console.error('Error fetching post:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,13 +105,6 @@ export default function BlogPostForm({ params }: { params: { action: string; id:
     setError(null);
 
     try {
-      // Log the environment variables (without the key)
-      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-      console.log('Environment check:', {
-        hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-        hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      });
-
       // Validate required fields
       if (!post.title || !post.slug || !post.content) {
         throw new Error('Title, slug, and content are required');
@@ -118,17 +114,8 @@ export default function BlogPostForm({ params }: { params: { action: string; id:
         ...post,
         updated_at: new Date().toISOString(),
         created_at: params.action === 'new' ? new Date().toISOString() : post.created_at,
-        status: post.status || 'draft',
-        tags: post.tags || [],
-        author: post.author || 'Bamise',
-        content: post.content || '',
-        excerpt: post.excerpt || '',
-        cover_image: post.cover_image || '',
-        meta_title: post.meta_title || '',
-        meta_description: post.meta_description || '',
+        published_at: post.status === 'published' ? new Date().toISOString() : null,
       };
-
-      console.log('Saving post data:', postData);
 
       if (params.action === 'new') {
         console.log('Creating new post...');
@@ -155,7 +142,7 @@ export default function BlogPostForm({ params }: { params: { action: string; id:
       }
 
       router.push('/dashboard/blog');
-    } catch (err) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to save post';
       setError(errorMessage);
       console.error('Error saving post:', err);
@@ -208,8 +195,9 @@ export default function BlogPostForm({ params }: { params: { action: string; id:
 
       if (error) throw error;
       router.push('/dashboard/blog');
-    } catch (err) {
-      setError('Failed to publish post');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to publish post';
+      setError(errorMessage);
       console.error('Error publishing post:', err);
     } finally {
       setLoading(false);

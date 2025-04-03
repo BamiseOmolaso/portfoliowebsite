@@ -1,53 +1,63 @@
-import { createServerClient } from '@supabase/ssr';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = createRouteHandlerClient({ cookies });
 
-    // Get all subscribers
-    const { data: subscribers, error } = await supabase
+    // Fetch all subscribers with their tags
+    const { data: subscribers, error: subscribersError } = await supabase
       .from('newsletter_subscribers')
-      .select('*')
+      .select(`
+        *,
+        subscriber_tags (
+          tag:newsletter_tags (
+            id,
+            name,
+            description
+          )
+        )
+      `)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      throw error;
+    if (subscribersError) {
+      throw subscribersError;
     }
 
     // Convert to CSV format
-    const csvContent = [
-      ['Email', 'Name', 'Subscribed At'],
-      ...subscribers.map(subscriber => [
+    const headers = ['Email', 'Name', 'Subscribed At', 'Tags'];
+    const rows = subscribers.map(subscriber => {
+      const tags = subscriber.subscriber_tags
+        .map((st: any) => st.tag.name)
+        .join('; ');
+      return [
         subscriber.email,
         subscriber.name || '',
         new Date(subscriber.created_at).toLocaleString(),
-      ]),
-    ]
-      .map(row => row.join(','))
-      .join('\n');
+        tags,
+      ];
+    });
 
-    // Create response with CSV file
-    return new NextResponse(csvContent, {
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+    ].join('\n');
+
+    // Create response with CSV content
+    const response = new NextResponse(csvContent, {
       headers: {
         'Content-Type': 'text/csv',
         'Content-Disposition': 'attachment; filename="subscribers.csv"',
       },
     });
-  } catch (error) {
-    console.error('Error exporting subscribers:', error);
-    return NextResponse.json({ error: 'Failed to export subscribers' }, { status: 500 });
+
+    return response;
+  } catch (err: unknown) {
+    console.error('Error exporting subscribers:', err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Failed to export subscribers' },
+      { status: 500 }
+    );
   }
 }

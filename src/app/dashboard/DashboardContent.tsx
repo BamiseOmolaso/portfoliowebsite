@@ -47,8 +47,9 @@ export default function DashboardContent() {
 
         if (error) throw error;
         setMessages(data || []);
-      } catch (err) {
-        setError('Failed to fetch messages');
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch messages';
+        setError(errorMessage);
         console.error('Error fetching messages:', err);
       } finally {
         setLoading(false);
@@ -59,8 +60,13 @@ export default function DashboardContent() {
   }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
+    try {
+      await supabase.auth.signOut();
+      router.push('/login');
+    } catch (err: unknown) {
+      console.error('Error signing out:', err instanceof Error ? err.message : err);
+      alert('Failed to sign out. Please try again.');
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -79,9 +85,10 @@ export default function DashboardContent() {
       
       // Update the messages state to remove the deleted message
       setMessages(prevMessages => prevMessages.filter(message => message.id !== id));
-    } catch (err) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete message';
       console.error('Error deleting message:', err);
-      alert('Failed to delete message. Please try again.');
+      alert(errorMessage);
     } finally {
       setDeletingId(null);
     }

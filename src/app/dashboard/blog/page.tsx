@@ -41,9 +41,8 @@ export default function BlogPosts() {
 
       if (error) throw error;
       setPosts(data || []);
-    } catch (err) {
-      setError('Failed to fetch posts');
-      console.error('Error fetching posts:', err);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch blog posts');
     } finally {
       setLoading(false);
     }
@@ -56,10 +55,10 @@ export default function BlogPosts() {
       const { error } = await supabase.from('blog_posts').delete().eq('id', id);
 
       if (error) throw error;
-      setPosts(posts.filter(post => post.id !== id));
-    } catch (err) {
-      setError('Failed to delete post');
+      setPosts(prev => prev.filter(post => post.id !== id));
+    } catch (err: unknown) {
       console.error('Error deleting post:', err);
+      alert(err instanceof Error ? err.message : 'Failed to delete post');
     }
   };
 
@@ -75,9 +74,9 @@ export default function BlogPosts() {
         .eq('id', id);
 
       if (error) throw error;
-      fetchPosts(); // Refresh the posts list
-    } catch (err) {
-      setError('Failed to publish post');
+      fetchPosts();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to publish post');
       console.error('Error publishing post:', err);
     }
   };
@@ -95,8 +94,9 @@ export default function BlogPosts() {
 
       if (error) throw error;
       fetchPosts(); // Refresh the posts list
-    } catch (err) {
-      setError('Failed to unpublish post');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to unpublish post';
+      setError(errorMessage);
       console.error('Error unpublishing post:', err);
     }
   };

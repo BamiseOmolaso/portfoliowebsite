@@ -67,8 +67,8 @@ export const POST = withRateLimit(contactFormLimiter, 'contact-form', async (req
           <p>${message.replace(/\n/g, '<br>')}</p>
         `
       });
-    } catch (emailError) {
-      console.error('Admin email error:', emailError);
+    } catch (err: unknown) {
+      console.error('Admin email error:', err instanceof Error ? err.message : err);
       // Don't return error here since the message was saved to the database
     }
 
@@ -80,16 +80,16 @@ export const POST = withRateLimit(contactFormLimiter, 'contact-form', async (req
         subject: `Re: ${subject}`,
         html: responseMessage
       });
-    } catch (responseEmailError) {
-      console.error('Response email error:', responseEmailError);
+    } catch (err: unknown) {
+      console.error('Response email error:', err instanceof Error ? err.message : err);
       // Don't return error here since the message was saved to the database
     }
 
     return NextResponse.json({ message: 'Message sent successfully' });
-  } catch (error) {
-    console.error('Contact form error:', error);
+  } catch (err: unknown) {
+    console.error('Contact form error:', err instanceof Error ? err.message : err);
     return NextResponse.json(
-      { error: 'Failed to process request' },
+      { error: err instanceof Error ? err.message : 'Failed to process request' },
       { status: 500 }
     );
   }

@@ -69,8 +69,9 @@ export default function NewsletterMetrics() {
       );
 
       setMetrics(metricsData);
-    } catch (err) {
-      setError('Failed to fetch metrics');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch metrics';
+      setError(errorMessage);
       console.error('Error fetching metrics:', err);
     } finally {
       setLoading(false);
