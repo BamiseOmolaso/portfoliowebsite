@@ -4,8 +4,6 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { withRateLimit, contactFormLimiter } from '@/lib/rate-limit';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export const POST = withRateLimit(contactFormLimiter, 'contact-form', async (request: Request) => {
   try {
     const { name, email, subject, message } = await request.json();
@@ -49,6 +47,9 @@ export const POST = withRateLimit(contactFormLimiter, 'contact-form', async (req
         { status: 500 }
       );
     }
+
+    // Initialize Resend client
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     // Generate a personalized response based on the subject and message content
     const responseMessage = generatePersonalizedResponse(name, subject, message);
