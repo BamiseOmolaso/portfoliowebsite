@@ -23,11 +23,11 @@ class RateLimiter {
 
   private cleanup() {
     const now = Date.now();
-    for (const [key, value] of this.requests.entries()) {
+    Array.from(this.requests.entries()).forEach(([key, value]) => {
       if (value.resetTime <= now) {
         this.requests.delete(key);
       }
-    }
+    });
   }
 
   check(key: string): RateLimitResult {

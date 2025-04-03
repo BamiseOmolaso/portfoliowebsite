@@ -5,9 +5,15 @@ import { NextResponse, type NextRequest } from 'next/server';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+// Early return if environment variables are not set
 if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Required environment variables are not set');
   throw new Error('Required environment variables are not set');
 }
+
+// Now TypeScript knows these are strings
+const supabaseUrlString: string = supabaseUrl;
+const supabaseAnonKeyString: string = supabaseAnonKey;
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -17,8 +23,8 @@ export async function middleware(request: NextRequest) {
   });
 
   const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    supabaseUrlString,
+    supabaseAnonKeyString,
     {
       cookies: {
         get(name: string) {

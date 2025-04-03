@@ -31,7 +31,7 @@ export function useSupabaseQuery<T>(
         if (error) {
           setState({
             data: null,
-            error: error instanceof Error ? error : new Error(error.message),
+            error: error instanceof Error ? error : new Error(String(error)),
             loading: false,
           });
           return;
