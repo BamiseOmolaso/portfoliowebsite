@@ -4,19 +4,9 @@ import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { motion } from 'framer-motion';
 import { BarChart, Users, Mail, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { NewsletterMetrics } from '@/types/newsletter';
 
-interface NewsletterMetrics {
-  id: string;
-  subject: string;
-  sent_at: string;
-  total_subscribers: number;
-  sent_count: number;
-  delivered_count: number;
-  failed_count: number;
-  open_rate: number;
-}
-
-export default function NewsletterMetrics() {
+export default function NewsletterMetricsPage() {
   const [metrics, setMetrics] = useState<NewsletterMetrics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

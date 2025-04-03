@@ -5,16 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Calendar, Send, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-
-interface Newsletter {
-  id: string;
-  subject: string;
-  content: string;
-  status: 'draft' | 'scheduled' | 'sent';
-  scheduled_for: string | null;
-  sent_at: string | null;
-  created_at: string;
-}
+import { Newsletter } from '@/types/newsletter';
 
 export default function NewslettersPage() {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);

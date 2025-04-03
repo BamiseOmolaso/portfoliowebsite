@@ -5,18 +5,11 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Editor from '@/app/components/Editor';
 import { Calendar } from 'lucide-react';
-
-interface Newsletter {
-  id?: string;
-  subject: string;
-  content: string;
-  status: 'draft' | 'scheduled' | 'sent';
-  scheduled_for: string | null;
-}
+import { NewsletterFormData } from '@/types/newsletter';
 
 export default function NewsletterForm({ params }: { params: { action: string; id: string } }) {
   const router = useRouter();
-  const [newsletter, setNewsletter] = useState<Newsletter>({
+  const [newsletter, setNewsletter] = useState<NewsletterFormData>({
     subject: '',
     content: '',
     status: 'draft',
@@ -72,7 +65,7 @@ export default function NewsletterForm({ params }: { params: { action: string; i
       const newsletterData = {
         ...newsletter,
         updated_at: new Date().toISOString(),
-        created_at: params.action === 'new' ? new Date().toISOString() : newsletter.created_at,
+        created_at: params.action === 'new' ? new Date().toISOString() : newsletter.created_at || new Date().toISOString(),
       };
 
       if (params.action === 'new') {
