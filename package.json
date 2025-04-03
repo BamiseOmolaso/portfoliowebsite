@@ -31,7 +31,7 @@
     "isomorphic-dompurify": "^2.22.0",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.487.0",
-    "next": "14.2.25",
+    "next": "15.2.4",
     "nodemailer": "^6.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
