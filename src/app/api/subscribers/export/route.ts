@@ -48,9 +48,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error exporting subscribers:', error);
-    return NextResponse.json(
-      { error: 'Failed to export subscribers' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to export subscribers' }, { status: 500 });
   }
-} 
+}

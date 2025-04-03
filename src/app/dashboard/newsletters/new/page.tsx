@@ -43,9 +43,7 @@ export default function NewNewsletter() {
 
   const fetchTags = async () => {
     try {
-      const { data, error } = await supabase
-        .from('newsletter_tags')
-        .select('*');
+      const { data, error } = await supabase.from('newsletter_tags').select('*');
 
       if (error) throw error;
       setAvailableTags(data || []);
@@ -60,9 +58,7 @@ export default function NewNewsletter() {
     setError(null);
 
     try {
-      const { error: insertError } = await supabase
-        .from('newsletters')
-        .insert([newsletter]);
+      const { error: insertError } = await supabase.from('newsletters').insert([newsletter]);
 
       if (insertError) throw insertError;
       router.push('/dashboard/newsletters');
@@ -84,20 +80,20 @@ export default function NewNewsletter() {
       setNewsletter(prev => ({
         ...prev,
         status: 'scheduled',
-        scheduled_for: tomorrow.toISOString()
+        scheduled_for: tomorrow.toISOString(),
       }));
     } else {
       setNewsletter(prev => ({
         ...prev,
         status: 'draft',
-        scheduled_for: null
+        scheduled_for: null,
       }));
     }
   };
 
   const handleSendNow = async () => {
     if (!confirm('Are you sure you want to send this newsletter now?')) return;
-    
+
     setLoading(true);
     setError(null);
 
@@ -118,9 +114,9 @@ export default function NewNewsletter() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           newsletterId: data.id,
-          tags: selectedTags
+          tags: selectedTags,
         }),
       });
 
@@ -165,19 +161,17 @@ export default function NewNewsletter() {
             type="text"
             id="subject"
             value={newsletter.subject}
-            onChange={(e) => setNewsletter(prev => ({ ...prev, subject: e.target.value }))}
+            onChange={e => setNewsletter(prev => ({ ...prev, subject: e.target.value }))}
             required
             className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Content
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Content</label>
           <Editor
             content={newsletter.content}
-            onChange={(content) => setNewsletter(prev => ({ ...prev, content }))}
+            onChange={content => setNewsletter(prev => ({ ...prev, content }))}
             placeholder="Write your newsletter content here..."
           />
         </div>
@@ -187,15 +181,13 @@ export default function NewNewsletter() {
             Send to Subscribers with Tags
           </label>
           <div className="flex flex-wrap gap-2">
-            {availableTags.map((tag) => (
+            {availableTags.map(tag => (
               <button
                 key={tag.id}
                 type="button"
                 onClick={() => {
                   setSelectedTags(prev =>
-                    prev.includes(tag.id)
-                      ? prev.filter(id => id !== tag.id)
-                      : [...prev, tag.id]
+                    prev.includes(tag.id) ? prev.filter(id => id !== tag.id) : [...prev, tag.id]
                   );
                 }}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
@@ -221,9 +213,7 @@ export default function NewNewsletter() {
             type="button"
             onClick={handleScheduleToggle}
             className={`flex items-center px-4 py-2 rounded-md ${
-              showSchedule
-                ? 'bg-yellow-600 hover:bg-yellow-700'
-                : 'bg-gray-700 hover:bg-gray-600'
+              showSchedule ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-700 hover:bg-gray-600'
             } transition-colors`}
           >
             <Calendar className="w-4 h-4 mr-2" />
@@ -233,12 +223,18 @@ export default function NewNewsletter() {
           {showSchedule && (
             <input
               type="datetime-local"
-              value={newsletter.scheduled_for ? new Date(newsletter.scheduled_for).toISOString().slice(0, 16) : ''}
-              onChange={(e) => setNewsletter(prev => ({
-                ...prev,
-                status: 'scheduled',
-                scheduled_for: new Date(e.target.value).toISOString()
-              }))}
+              value={
+                newsletter.scheduled_for
+                  ? new Date(newsletter.scheduled_for).toISOString().slice(0, 16)
+                  : ''
+              }
+              onChange={e =>
+                setNewsletter(prev => ({
+                  ...prev,
+                  status: 'scheduled',
+                  scheduled_for: new Date(e.target.value).toISOString(),
+                }))
+              }
               className="px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           )}
@@ -272,4 +268,4 @@ export default function NewNewsletter() {
       </form>
     </div>
   );
-} 
+}

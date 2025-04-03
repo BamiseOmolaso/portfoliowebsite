@@ -31,12 +31,14 @@ A modern, responsive portfolio website showcasing Dr. Oluwabamise David Omolaso'
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/portfolio-website.git
 cd portfolio-website
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 # or
@@ -44,11 +46,13 @@ yarn install
 ```
 
 3. Create a `.env.local` file in the root directory and add your environment variables:
+
 ```env
 # Add your environment variables here
 ```
 
 4. Run the development server:
+
 ```bash
 npm run dev
 # or

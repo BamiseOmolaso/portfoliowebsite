@@ -6,12 +6,9 @@ import { Resend } from 'resend';
 export async function POST(request: Request) {
   try {
     const { newsletterId, tags } = await request.json();
-    
+
     if (!newsletterId) {
-      return NextResponse.json(
-        { error: 'Newsletter ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Newsletter ID is required' }, { status: 400 });
     }
 
     const cookieStore = cookies();
@@ -42,22 +39,14 @@ export async function POST(request: Request) {
 
     if (newsletterError) {
       console.error('Error fetching newsletter:', newsletterError);
-      return NextResponse.json(
-        { error: 'Failed to fetch newsletter' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to fetch newsletter' }, { status: 500 });
     }
     if (!newsletter) {
-      return NextResponse.json(
-        { error: 'Newsletter not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Newsletter not found' }, { status: 404 });
     }
 
     // Get subscribers based on tags if provided
-    let subscribersQuery = supabase
-      .from('newsletter_subscribers')
-      .select('*');
+    let subscribersQuery = supabase.from('newsletter_subscribers').select('*');
 
     if (tags && tags.length > 0) {
       const { data: taggedSubscribers } = await supabase
@@ -82,16 +71,10 @@ export async function POST(request: Request) {
 
     if (subscribersError) {
       console.error('Error fetching subscribers:', subscribersError);
-      return NextResponse.json(
-        { error: 'Failed to fetch subscribers' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to fetch subscribers' }, { status: 500 });
     }
     if (!subscribers || subscribers.length === 0) {
-      return NextResponse.json(
-        { error: 'No subscribers found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'No subscribers found' }, { status: 404 });
     }
 
     // Initialize Resend
@@ -114,13 +97,13 @@ export async function POST(request: Request) {
         }
 
         // Create newsletter_sends record
-        const { error: sendError } = await supabase
-          .from('newsletter_sends')
-          .insert([{
+        const { error: sendError } = await supabase.from('newsletter_sends').insert([
+          {
             newsletter_id: newsletterId,
             subscriber_id: subscriber.id,
-            status: 'pending'
-          }]);
+            status: 'pending',
+          },
+        ]);
 
         if (sendError) throw sendError;
 
@@ -154,7 +137,7 @@ export async function POST(request: Request) {
           .from('newsletter_sends')
           .update({
             status: 'failed',
-            error_message: err instanceof Error ? err.message : 'Unknown error'
+            error_message: err instanceof Error ? err.message : 'Unknown error',
           })
           .eq('newsletter_id', newsletterId)
           .eq('subscriber_id', subscriber.id);
@@ -166,16 +149,13 @@ export async function POST(request: Request) {
       .from('newsletters')
       .update({
         status: 'sent',
-        sent_at: new Date().toISOString()
+        sent_at: new Date().toISOString(),
       })
       .eq('id', newsletterId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error sending newsletter:', error);
-    return NextResponse.json(
-      { error: 'Failed to send newsletter' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to send newsletter' }, { status: 500 });
   }
-} 
+}

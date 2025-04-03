@@ -22,7 +22,7 @@
   .gradient-text {
     @apply bg-gradient-to-r from-purple-500 to-purple-700 bg-clip-text text-transparent;
   }
-  
+
   .gradient-border {
     @apply relative;
     &::before {

@@ -8,9 +8,10 @@ import Editor from '@/app/components/Editor';
 interface BlogPost {
   title: string;
   slug: string;
-  content: string;
   excerpt: string;
-  published: boolean;
+  content: string;
+  author: string;
+  status: 'draft' | 'published' | 'scheduled';
 }
 
 export default function NewBlogPost() {
@@ -18,9 +19,10 @@ export default function NewBlogPost() {
   const [post, setPost] = useState<BlogPost>({
     title: '',
     slug: '',
-    content: '',
     excerpt: '',
-    published: false,
+    content: '',
+    author: 'Bamise Omolaso',
+    status: 'draft',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,23 +39,28 @@ export default function NewBlogPost() {
     try {
       const { error } = await supabase
         .from('blog_posts')
-        .insert([{ ...post, created_at: new Date().toISOString() }]);
+        .insert([
+          { 
+            ...post, 
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            published_at: post.status === 'published' ? new Date().toISOString() : null
+          }
+        ]);
 
       if (error) throw error;
       router.push('/dashboard/blog');
     } catch (err) {
-      setError('Failed to save post');
-      console.error('Error saving post:', err);
+      setError('Failed to save blog post');
+      console.error('Error saving blog post:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setPost((prev) => ({ ...prev, [name]: value }));
+    setPost(prev => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -113,30 +120,31 @@ export default function NewBlogPost() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Content
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Content</label>
           <div className="bg-white">
             <Editor
               content={post.content}
-              onChange={(newContent) => setPost((prev) => ({ ...prev, content: newContent }))}
+              onChange={newContent => setPost(prev => ({ ...prev, content: newContent }))}
               placeholder="Write your blog post here..."
             />
           </div>
         </div>
 
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="published"
-            name="published"
-            checked={post.published}
-            onChange={(e) => setPost((prev) => ({ ...prev, published: e.target.checked }))}
-            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-700 rounded"
-          />
-          <label htmlFor="published" className="ml-2 block text-sm text-gray-300">
-            Published
+        <div>
+          <label htmlFor="status" className="block text-sm font-medium text-gray-300 mb-2">
+            Status
           </label>
+          <select
+            id="status"
+            name="status"
+            value={post.status}
+            onChange={handleChange}
+            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="scheduled">Scheduled</option>
+          </select>
         </div>
 
         <div className="flex justify-end space-x-4">
@@ -158,4 +166,4 @@ export default function NewBlogPost() {
       </form>
     </div>
   );
-} 
+}

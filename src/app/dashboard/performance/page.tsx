@@ -95,7 +95,7 @@ export default function PerformanceDashboard() {
           <h2 className="text-xl font-semibold text-white mb-4">Largest Contentful Paint (LCP)</h2>
           <div className="bg-gray-900 rounded-lg p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {lcpMetrics.map((metric) => (
+              {lcpMetrics.map(metric => (
                 <div key={metric.id} className="bg-gray-800 p-4 rounded-lg">
                   <p className="text-gray-400">URL: {metric.url}</p>
                   <p className="text-gray-400">Value: {metric.value.toFixed(2)}ms</p>
@@ -113,12 +113,10 @@ export default function PerformanceDashboard() {
           <h2 className="text-xl font-semibold text-white mb-4">Performance Metrics</h2>
           <div className="bg-gray-900 rounded-lg p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {metrics.map((metric) => (
+              {metrics.map(metric => (
                 <div key={metric.id} className="bg-gray-800 p-4 rounded-lg">
                   <p className="text-gray-400">URL: {metric.url}</p>
-                  <p className="text-gray-400">
-                    FCP: {metric.metrics.fcp?.toFixed(2) || 'N/A'}ms
-                  </p>
+                  <p className="text-gray-400">FCP: {metric.metrics.fcp?.toFixed(2) || 'N/A'}ms</p>
                   <p className="text-gray-400">
                     TTFB: {metric.metrics.ttfb?.toFixed(2) || 'N/A'}ms
                   </p>
@@ -139,4 +137,4 @@ export default function PerformanceDashboard() {
       </div>
     </>
   );
-} 
+}

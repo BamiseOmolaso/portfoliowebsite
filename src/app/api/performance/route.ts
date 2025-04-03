@@ -9,16 +9,14 @@ const supabase = createClient(
 export async function POST(request: Request) {
   try {
     const metrics = await request.json();
-    
+
     // Store metrics in Supabase
-    const { error } = await supabase
-      .from('performance_metrics')
-      .insert({
-        metrics,
-        url: request.headers.get('referer'),
-        user_agent: request.headers.get('user-agent'),
-        timestamp: new Date().toISOString(),
-      });
+    const { error } = await supabase.from('performance_metrics').insert({
+      metrics,
+      url: request.headers.get('referer'),
+      user_agent: request.headers.get('user-agent'),
+      timestamp: new Date().toISOString(),
+    });
 
     if (error) {
       console.error('Error storing performance metrics:', error);
@@ -30,4 +28,4 @@ export async function POST(request: Request) {
     console.error('Error processing performance metrics:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

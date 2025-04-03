@@ -55,9 +55,9 @@ export default function NewslettersPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           newsletterId: id,
-          tags: [] // Optional: pass tags if you want to filter subscribers
+          tags: [], // Optional: pass tags if you want to filter subscribers
         }),
       });
 
@@ -109,7 +109,7 @@ export default function NewslettersPage() {
         <div className="text-gray-400">No newsletters yet</div>
       ) : (
         <div className="space-y-4">
-          {newsletters.map((newsletter) => (
+          {newsletters.map(newsletter => (
             <motion.div
               key={newsletter.id}
               initial={{ opacity: 0, y: 20 }}
@@ -168,4 +168,4 @@ export default function NewslettersPage() {
       )}
     </div>
   );
-} 
+}

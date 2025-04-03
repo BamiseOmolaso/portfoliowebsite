@@ -5,11 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -22,21 +18,13 @@ export default function DashboardLayout({
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="text-gray-300 hover:text-white"
           >
-            {isSidebarOpen ? (
-              <XMarkIcon className="h-6 w-6" />
-            ) : (
-              <Bars3Icon className="h-6 w-6" />
-            )}
+            {isSidebarOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
           </button>
         </div>
 
         <div className="flex flex-col md:flex-row">
           {/* Sidebar */}
-          <div
-            className={`${
-              isSidebarOpen ? 'block' : 'hidden'
-            } md:block w-full md:w-64 py-6`}
-          >
+          <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block w-full md:w-64 py-6`}>
             <nav className="space-y-1">
               <Link
                 href="/dashboard"
@@ -112,11 +100,9 @@ export default function DashboardLayout({
           </div>
 
           {/* Main content */}
-          <div className="flex-1 py-6">
-            {children}
-          </div>
+          <div className="flex-1 py-6">{children}</div>
         </div>
       </div>
     </div>
   );
-} 
+}

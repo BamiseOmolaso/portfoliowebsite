@@ -4,4 +4,4 @@ import DashboardContent from './DashboardContent';
 export default async function DashboardPage() {
   await checkAuth();
   return <DashboardContent />;
-} 
+}

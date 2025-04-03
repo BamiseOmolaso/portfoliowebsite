@@ -2,7 +2,8 @@ import { Metadata } from 'next';
 
 export const defaultMetadata: Metadata = {
   title: 'Oluwabamise Omolaso - Full Stack Developer',
-  description: 'Portfolio website of Oluwabamise Omolaso, a Full Stack Developer specializing in modern web technologies.',
+  description:
+    'Portfolio website of Oluwabamise Omolaso, a Full Stack Developer specializing in modern web technologies.',
   keywords: ['Full Stack Developer', 'Web Developer', 'React', 'Next.js', 'TypeScript', 'Node.js'],
   authors: [{ name: 'Oluwabamise Omolaso' }],
   creator: 'Oluwabamise Omolaso',
@@ -21,7 +22,8 @@ export const defaultMetadata: Metadata = {
     locale: 'en_US',
     url: 'https://yourdomain.com',
     title: 'Oluwabamise Omolaso - Full Stack Developer',
-    description: 'Portfolio website of Oluwabamise Omolaso, a Full Stack Developer specializing in modern web technologies.',
+    description:
+      'Portfolio website of Oluwabamise Omolaso, a Full Stack Developer specializing in modern web technologies.',
     siteName: 'Oluwabamise Omolaso',
     images: [
       {
@@ -35,7 +37,8 @@ export const defaultMetadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Oluwabamise Omolaso - Full Stack Developer',
-    description: 'Portfolio website of Oluwabamise Omolaso, a Full Stack Developer specializing in modern web technologies.',
+    description:
+      'Portfolio website of Oluwabamise Omolaso, a Full Stack Developer specializing in modern web technologies.',
     images: ['/twitter-image.jpg'],
     creator: '@yourtwitterhandle',
   },
@@ -60,4 +63,4 @@ export const getMetadata = (metadata?: Partial<Metadata>): Metadata => {
     ...defaultMetadata,
     ...metadata,
   };
-}; 
+};

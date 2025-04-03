@@ -9,16 +9,14 @@ const supabase = createClient(
 export async function POST(request: Request) {
   try {
     const { value, url } = await request.json();
-    
+
     // Store LCP metric in Supabase
-    const { error } = await supabase
-      .from('lcp_metrics')
-      .insert({
-        value,
-        url,
-        user_agent: request.headers.get('user-agent'),
-        timestamp: new Date().toISOString(),
-      });
+    const { error } = await supabase.from('lcp_metrics').insert({
+      value,
+      url,
+      user_agent: request.headers.get('user-agent'),
+      timestamp: new Date().toISOString(),
+    });
 
     if (error) {
       console.error('Error storing LCP metric:', error);
@@ -30,4 +28,4 @@ export async function POST(request: Request) {
     console.error('Error processing LCP metric:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

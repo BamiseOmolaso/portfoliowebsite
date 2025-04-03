@@ -12,7 +12,7 @@ interface BlogPost {
   excerpt: string;
   content: string;
   created_at: string;
-  published: boolean;
+  status: 'draft' | 'published' | 'scheduled';
 }
 
 const BlogPage = () => {
@@ -32,7 +32,7 @@ const BlogPage = () => {
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
-        .eq('published', true)
+        .eq('status', 'published')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -72,7 +72,7 @@ const BlogPage = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.map((post) => (
+          {posts.map(post => (
             <motion.article
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
@@ -86,7 +86,7 @@ const BlogPage = () => {
                   <span className="text-4xl text-purple-400 opacity-50">Blog</span>
                 </div>
               </div>
-              
+
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-sm text-purple-400">
@@ -123,4 +123,4 @@ const BlogPage = () => {
   );
 };
 
-export default BlogPage; 
+export default BlogPage;

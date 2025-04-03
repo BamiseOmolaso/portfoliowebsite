@@ -41,4 +41,4 @@ export async function sendWelcomeEmail(email: string, name?: string) {
   }
 }
 
-export { resend }; 
+export { resend };

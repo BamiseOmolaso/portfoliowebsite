@@ -10,12 +10,12 @@ const transporter = nodemailer.createTransport({
   },
   tls: {
     // Do not fail on invalid certs
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
 // Verify transporter configuration
-transporter.verify(function(error, success) {
+transporter.verify(function (error, success) {
   if (error) {
     console.error('SMTP Configuration Error:', error);
   } else {
@@ -56,4 +56,4 @@ export async function sendContactEmail({
     console.error('Error sending email:', error);
     throw error;
   }
-} 
+}

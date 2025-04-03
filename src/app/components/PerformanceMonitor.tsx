@@ -14,7 +14,7 @@ export function PerformanceMonitor() {
     const trackLCP = () => {
       const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
       const lastEntry = lcpEntries[lcpEntries.length - 1];
-      
+
       if (lastEntry) {
         supabase
           .from('lcp_metrics')
@@ -34,10 +34,12 @@ export function PerformanceMonitor() {
     // Track other performance metrics
     const trackPerformance = () => {
       const metrics = {
-        fcp: performance.getEntriesByType('paint')
+        fcp: performance
+          .getEntriesByType('paint')
           .find(entry => entry.name === 'first-contentful-paint')?.startTime,
         ttfb: performance.timing.responseStart - performance.timing.requestStart,
-        domContentLoaded: performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart,
+        domContentLoaded:
+          performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart,
         load: performance.timing.loadEventEnd - performance.timing.navigationStart,
       };
 
@@ -56,7 +58,7 @@ export function PerformanceMonitor() {
     };
 
     // Set up observers
-    const observer = new PerformanceObserver((list) => {
+    const observer = new PerformanceObserver(list => {
       for (const entry of list.getEntries()) {
         if (entry.entryType === 'largest-contentful-paint') {
           trackLCP();
@@ -80,4 +82,4 @@ export function PerformanceMonitor() {
   }, []);
 
   return null;
-} 
+}

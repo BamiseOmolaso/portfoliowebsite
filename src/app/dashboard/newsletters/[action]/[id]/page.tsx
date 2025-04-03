@@ -14,11 +14,7 @@ interface Newsletter {
   scheduled_for: string | null;
 }
 
-export default function NewsletterForm({
-  params,
-}: {
-  params: { action: string; id: string };
-}) {
+export default function NewsletterForm({ params }: { params: { action: string; id: string } }) {
   const router = useRouter();
   const [newsletter, setNewsletter] = useState<Newsletter>({
     subject: '',
@@ -66,16 +62,11 @@ export default function NewsletterForm({
 
     try {
       if (params.action === 'new') {
-        const { error } = await supabase
-          .from('newsletters')
-          .insert([{ ...newsletter }]);
+        const { error } = await supabase.from('newsletters').insert([{ ...newsletter }]);
 
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('newsletters')
-          .update(newsletter)
-          .eq('id', params.id);
+        const { error } = await supabase.from('newsletters').update(newsletter).eq('id', params.id);
 
         if (error) throw error;
       }
@@ -99,13 +90,13 @@ export default function NewsletterForm({
       setNewsletter(prev => ({
         ...prev,
         status: 'scheduled',
-        scheduled_for: tomorrow.toISOString()
+        scheduled_for: tomorrow.toISOString(),
       }));
     } else {
       setNewsletter(prev => ({
         ...prev,
         status: 'draft',
-        scheduled_for: null
+        scheduled_for: null,
       }));
     }
   };
@@ -131,19 +122,17 @@ export default function NewsletterForm({
             type="text"
             id="subject"
             value={newsletter.subject}
-            onChange={(e) => setNewsletter(prev => ({ ...prev, subject: e.target.value }))}
+            onChange={e => setNewsletter(prev => ({ ...prev, subject: e.target.value }))}
             required
             className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Content
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Content</label>
           <Editor
             content={newsletter.content}
-            onChange={(content) => setNewsletter(prev => ({ ...prev, content }))}
+            onChange={content => setNewsletter(prev => ({ ...prev, content }))}
             placeholder="Write your newsletter content here..."
           />
         </div>
@@ -153,9 +142,7 @@ export default function NewsletterForm({
             type="button"
             onClick={handleScheduleToggle}
             className={`flex items-center px-4 py-2 rounded-md ${
-              showSchedule
-                ? 'bg-yellow-600 hover:bg-yellow-700'
-                : 'bg-gray-700 hover:bg-gray-600'
+              showSchedule ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-700 hover:bg-gray-600'
             } transition-colors`}
           >
             <Calendar className="w-4 h-4 mr-2" />
@@ -165,12 +152,18 @@ export default function NewsletterForm({
           {showSchedule && (
             <input
               type="datetime-local"
-              value={newsletter.scheduled_for ? new Date(newsletter.scheduled_for).toISOString().slice(0, 16) : ''}
-              onChange={(e) => setNewsletter(prev => ({
-                ...prev,
-                status: 'scheduled',
-                scheduled_for: new Date(e.target.value).toISOString()
-              }))}
+              value={
+                newsletter.scheduled_for
+                  ? new Date(newsletter.scheduled_for).toISOString().slice(0, 16)
+                  : ''
+              }
+              onChange={e =>
+                setNewsletter(prev => ({
+                  ...prev,
+                  status: 'scheduled',
+                  scheduled_for: new Date(e.target.value).toISOString(),
+                }))
+              }
               className="px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           )}
@@ -195,4 +188,4 @@ export default function NewsletterForm({
       </form>
     </div>
   );
-} 
+}

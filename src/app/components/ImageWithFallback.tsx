@@ -54,4 +54,4 @@ export default function ImageWithFallback({
       loading={priority ? 'eager' : 'lazy'}
     />
   );
-} 
+}

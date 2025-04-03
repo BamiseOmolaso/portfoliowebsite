@@ -8,12 +8,16 @@ import Editor from '@/app/components/Editor';
 interface Project {
   title: string;
   slug: string;
-  description: string;
+  excerpt: string;
   content: string;
-  image_url: string;
+  cover_image: string;
+  meta_title: string;
+  meta_description: string;
+  technologies: string[];
   github_url?: string;
   live_url?: string;
-  published: boolean;
+  author: string;
+  status: 'draft' | 'published' | 'scheduled';
 }
 
 export default function NewProject() {
@@ -21,13 +25,18 @@ export default function NewProject() {
   const [project, setProject] = useState<Project>({
     title: '',
     slug: '',
-    description: '',
+    excerpt: '',
     content: '',
-    image_url: '',
+    cover_image: '',
+    meta_title: '',
+    meta_description: '',
+    technologies: [],
     github_url: '',
     live_url: '',
-    published: false,
+    status: 'draft',
+    author: 'Bamise Omolaso',
   });
+  const [techInput, setTechInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const supabase = createBrowserClient(
@@ -43,7 +52,14 @@ export default function NewProject() {
     try {
       const { error } = await supabase
         .from('projects')
-        .insert([{ ...project, created_at: new Date().toISOString() }]);
+        .insert([
+          { 
+            ...project, 
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            published_at: project.status === 'published' ? new Date().toISOString() : null
+          }
+        ]);
 
       if (error) throw error;
       router.push('/dashboard/projects');
@@ -55,11 +71,26 @@ export default function NewProject() {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setProject((prev) => ({ ...prev, [name]: value }));
+    setProject(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddTechnology = () => {
+    if (techInput.trim() && !project.technologies.includes(techInput.trim())) {
+      setProject(prev => ({
+        ...prev,
+        technologies: [...prev.technologies, techInput.trim()]
+      }));
+      setTechInput('');
+    }
+  };
+
+  const handleRemoveTechnology = (tech: string) => {
+    setProject(prev => ({
+      ...prev,
+      technologies: prev.technologies.filter(t => t !== tech)
+    }));
   };
 
   return (
@@ -104,13 +135,13 @@ export default function NewProject() {
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
-            Description
+          <label htmlFor="excerpt" className="block text-sm font-medium text-gray-300 mb-2">
+            Excerpt
           </label>
           <textarea
-            id="description"
-            name="description"
-            value={project.description}
+            id="excerpt"
+            name="excerpt"
+            value={project.excerpt}
             onChange={handleChange}
             required
             rows={3}
@@ -119,18 +150,86 @@ export default function NewProject() {
         </div>
 
         <div>
-          <label htmlFor="image_url" className="block text-sm font-medium text-gray-300 mb-2">
-            Image URL
+          <label htmlFor="cover_image" className="block text-sm font-medium text-gray-300 mb-2">
+            Cover Image URL
           </label>
           <input
             type="url"
-            id="image_url"
-            name="image_url"
-            value={project.image_url}
+            id="cover_image"
+            name="cover_image"
+            value={project.cover_image}
             onChange={handleChange}
             required
             className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
+        </div>
+
+        <div>
+          <label htmlFor="meta_title" className="block text-sm font-medium text-gray-300 mb-2">
+            Meta Title
+          </label>
+          <input
+            type="text"
+            id="meta_title"
+            name="meta_title"
+            value={project.meta_title}
+            onChange={handleChange}
+            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="meta_description" className="block text-sm font-medium text-gray-300 mb-2">
+            Meta Description
+          </label>
+          <textarea
+            id="meta_description"
+            name="meta_description"
+            value={project.meta_description}
+            onChange={handleChange}
+            rows={2}
+            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="technologies" className="block text-sm font-medium text-gray-300 mb-2">
+            Technologies
+          </label>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {project.technologies.map(tech => (
+              <span
+                key={tech}
+                className="px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded-full flex items-center"
+              >
+                {tech}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveTechnology(tech)}
+                  className="ml-2 text-indigo-300 hover:text-white"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex">
+            <input
+              type="text"
+              value={techInput}
+              onChange={(e) => setTechInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTechnology())}
+              placeholder="Add a technology"
+              className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 rounded-l-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              type="button"
+              onClick={handleAddTechnology}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700"
+            >
+              Add
+            </button>
+          </div>
         </div>
 
         <div>
@@ -162,30 +261,31 @@ export default function NewProject() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Content
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Content</label>
           <div className="bg-white">
             <Editor
               content={project.content}
-              onChange={(newContent) => setProject((prev) => ({ ...prev, content: newContent }))}
+              onChange={newContent => setProject(prev => ({ ...prev, content: newContent }))}
               placeholder="Write your project details here..."
             />
           </div>
         </div>
 
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="published"
-            name="published"
-            checked={project.published}
-            onChange={(e) => setProject((prev) => ({ ...prev, published: e.target.checked }))}
-            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-700 rounded"
-          />
-          <label htmlFor="published" className="ml-2 block text-sm text-gray-300">
-            Published
+        <div>
+          <label htmlFor="status" className="block text-sm font-medium text-gray-300 mb-2">
+            Status
           </label>
+          <select
+            id="status"
+            name="status"
+            value={project.status}
+            onChange={handleChange}
+            className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="scheduled">Scheduled</option>
+          </select>
         </div>
 
         <div className="flex justify-end space-x-4">
@@ -207,4 +307,4 @@ export default function NewProject() {
       </form>
     </div>
   );
-} 
+}

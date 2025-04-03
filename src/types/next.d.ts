@@ -8,4 +8,4 @@ declare global {
       main: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
     }
   }
-} 
+}

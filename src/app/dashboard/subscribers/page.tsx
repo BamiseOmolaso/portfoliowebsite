@@ -56,9 +56,9 @@ export default function SubscribersPage() {
       if (tagsError) throw tagsError;
 
       // Fetch subscriber tags
-      const { data: subscriberTagsData, error: subscriberTagsError } = await supabase
-        .from('subscriber_tags')
-        .select(`
+      const { data: subscriberTagsData, error: subscriberTagsError } = await supabase.from(
+        'subscriber_tags'
+      ).select(`
           subscriber_id,
           tag:newsletter_tags(*)
         `);
@@ -68,9 +68,9 @@ export default function SubscribersPage() {
       // Map subscribers with their tags
       const subscribersWithTags = subscribersData.map(subscriber => ({
         ...subscriber,
-        tags: subscriberTagsData
-          ?.filter(st => st.subscriber_id === subscriber.id)
-          .map(st => st.tag) || []
+        tags:
+          subscriberTagsData?.filter(st => st.subscriber_id === subscriber.id).map(st => st.tag) ||
+          [],
       }));
 
       setSubscribers(subscribersWithTags);
@@ -88,12 +88,12 @@ export default function SubscribersPage() {
 
     try {
       setError(null);
-      const { error } = await supabase
-        .from('newsletter_tags')
-        .insert([{
+      const { error } = await supabase.from('newsletter_tags').insert([
+        {
           name: newTagName,
-          description: newTagDescription
-        }]);
+          description: newTagDescription,
+        },
+      ]);
 
       if (error) throw error;
 
@@ -109,12 +109,12 @@ export default function SubscribersPage() {
   const handleAddTag = async (subscriberId: string, tagId: string) => {
     try {
       setError(null);
-      const { error } = await supabase
-        .from('subscriber_tags')
-        .insert([{
+      const { error } = await supabase.from('subscriber_tags').insert([
+        {
           subscriber_id: subscriberId,
-          tag_id: tagId
-        }]);
+          tag_id: tagId,
+        },
+      ]);
 
       if (error) throw error;
       fetchData();
@@ -175,14 +175,14 @@ export default function SubscribersPage() {
             <input
               type="text"
               value={newTagName}
-              onChange={(e) => setNewTagName(e.target.value)}
+              onChange={e => setNewTagName(e.target.value)}
               placeholder="New tag name"
               className="px-4 py-2 bg-gray-900 border border-gray-700 rounded-md text-white"
             />
             <input
               type="text"
               value={newTagDescription}
-              onChange={(e) => setNewTagDescription(e.target.value)}
+              onChange={e => setNewTagDescription(e.target.value)}
               placeholder="Description (optional)"
               className="px-4 py-2 bg-gray-900 border border-gray-700 rounded-md text-white"
             />
@@ -200,7 +200,7 @@ export default function SubscribersPage() {
         <div className="text-gray-400">No subscribers yet</div>
       ) : (
         <div className="space-y-4">
-          {subscribers.map((subscriber) => (
+          {subscribers.map(subscriber => (
             <motion.div
               key={subscriber.id}
               initial={{ opacity: 0, y: 20 }}
@@ -210,11 +210,9 @@ export default function SubscribersPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-xl font-semibold text-white">{subscriber.email}</h2>
-                  {subscriber.name && (
-                    <p className="text-gray-400">{subscriber.name}</p>
-                  )}
+                  {subscriber.name && <p className="text-gray-400">{subscriber.name}</p>}
                   <div className="flex items-center gap-2 mt-2">
-                    {subscriber.tags.map((tag) => (
+                    {subscriber.tags.map(tag => (
                       <span
                         key={tag.id}
                         className="flex items-center gap-1 px-2 py-1 bg-gray-800 text-gray-300 rounded-full text-sm"
@@ -233,7 +231,7 @@ export default function SubscribersPage() {
                 </div>
                 <div className="flex gap-2">
                   <select
-                    onChange={(e) => {
+                    onChange={e => {
                       if (e.target.value) {
                         handleAddTag(subscriber.id, e.target.value);
                         e.target.value = '';
@@ -243,8 +241,8 @@ export default function SubscribersPage() {
                   >
                     <option value="">Add tag...</option>
                     {tags
-                      .filter((tag) => !subscriber.tags.some((t) => t.id === tag.id))
-                      .map((tag) => (
+                      .filter(tag => !subscriber.tags.some(t => t.id === tag.id))
+                      .map(tag => (
                         <option key={tag.id} value={tag.id}>
                           {tag.name}
                         </option>
@@ -258,4 +256,4 @@ export default function SubscribersPage() {
       )}
     </div>
   );
-} 
+}

@@ -43,7 +43,7 @@ export default function NewsletterMetrics() {
 
       // Get metrics for each newsletter
       const metricsData = await Promise.all(
-        newsletters.map(async (newsletter) => {
+        newsletters.map(async newsletter => {
           const { data: sends, error: sendsError } = await supabase
             .from('newsletter_sends')
             .select('status')
@@ -63,7 +63,7 @@ export default function NewsletterMetrics() {
             sent_count: sent,
             delivered_count: sent,
             failed_count: failed,
-            open_rate: total > 0 ? (sent / total) * 100 : 0
+            open_rate: total > 0 ? (sent / total) * 100 : 0,
           };
         })
       );
@@ -104,7 +104,7 @@ export default function NewsletterMetrics() {
         <div className="text-gray-400">No newsletter metrics available yet</div>
       ) : (
         <div className="space-y-6">
-          {metrics.map((metric) => (
+          {metrics.map(metric => (
             <motion.div
               key={metric.id}
               initial={{ opacity: 0, y: 20 }}
@@ -142,7 +142,9 @@ export default function NewsletterMetrics() {
                     <CheckCircle className="w-5 h-5 text-green-500" />
                     <span>Open Rate</span>
                   </div>
-                  <p className="text-2xl font-bold text-white mt-2">{metric.open_rate.toFixed(1)}%</p>
+                  <p className="text-2xl font-bold text-white mt-2">
+                    {metric.open_rate.toFixed(1)}%
+                  </p>
                 </div>
 
                 <div className="bg-gray-800 p-4 rounded-lg">
@@ -159,4 +161,4 @@ export default function NewsletterMetrics() {
       )}
     </div>
   );
-} 
+}

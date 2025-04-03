@@ -1,7 +1,9 @@
 export function measurePerformance() {
   if (typeof window !== 'undefined' && 'performance' in window) {
     const timing = window.performance.timing;
-    const navigation = window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    const navigation = window.performance.getEntriesByType(
+      'navigation'
+    )[0] as PerformanceNavigationTiming;
 
     const metrics = {
       dnsLookup: timing.domainLookupEnd - timing.domainLookupStart,
@@ -32,7 +34,7 @@ export function measurePerformance() {
 
 export function startPerformanceObserver() {
   if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
-    const observer = new PerformanceObserver((list) => {
+    const observer = new PerformanceObserver(list => {
       for (const entry of list.getEntries()) {
         if (entry.entryType === 'largest-contentful-paint') {
           // Send LCP metric to your analytics service
@@ -54,4 +56,4 @@ export function startPerformanceObserver() {
 
     observer.observe({ entryTypes: ['largest-contentful-paint'] });
   }
-} 
+}

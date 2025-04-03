@@ -48,7 +48,7 @@ const Newsletter = () => {
           className="bg-gray-800 p-8 rounded-lg shadow-lg"
         >
           <h2 className="text-2xl font-bold text-white mb-6">Subscribe to Newsletter</h2>
-          
+
           {status === 'success' ? (
             <div className="bg-green-500/10 border border-green-500 text-green-500 px-4 py-3 rounded">
               {message}
@@ -63,12 +63,12 @@ const Newsletter = () => {
                   type="text"
                   id="name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={e => setName(e.target.value)}
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Your name"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                   Email
@@ -77,7 +77,7 @@ const Newsletter = () => {
                   type="email"
                   id="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   required
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="your@email.com"
@@ -105,4 +105,4 @@ const Newsletter = () => {
   );
 };
 
-export default Newsletter; 
+export default Newsletter;

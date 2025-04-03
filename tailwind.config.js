@@ -1,9 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./src/app/**/*.{js,ts,jsx,tsx}",
-    "./src/components/**/*.{js,ts,jsx,tsx}",
+    './src/**/*.{js,ts,jsx,tsx}',
+    './src/app/**/*.{js,ts,jsx,tsx}',
+    './src/components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -11,9 +11,9 @@ module.exports = {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       colors: {
-        primary: "#007AFF",
-        secondary: "#6B7280",
-        dark: "#1F2937",
+        primary: '#007AFF',
+        secondary: '#6B7280',
+        dark: '#1F2937',
         purple: {
           50: '#faf5ff',
           100: '#f3e8ff',
@@ -28,32 +28,32 @@ module.exports = {
         },
       },
       animation: {
-        blob: "blob 7s infinite",
+        blob: 'blob 7s infinite',
         'gradient-x': 'gradient-x 15s ease infinite',
       },
       keyframes: {
         blob: {
-          "0%": {
-            transform: "translate(0px, 0px) scale(1)",
+          '0%': {
+            transform: 'translate(0px, 0px) scale(1)',
           },
-          "33%": {
-            transform: "translate(30px, -50px) scale(1.1)",
+          '33%': {
+            transform: 'translate(30px, -50px) scale(1.1)',
           },
-          "66%": {
-            transform: "translate(-20px, 20px) scale(0.9)",
+          '66%': {
+            transform: 'translate(-20px, 20px) scale(0.9)',
           },
-          "100%": {
-            transform: "translate(0px, 0px) scale(1)",
+          '100%': {
+            transform: 'translate(0px, 0px) scale(1)',
           },
         },
         'gradient-x': {
           '0%, 100%': {
             'background-size': '200% 200%',
-            'background-position': 'left center'
+            'background-position': 'left center',
           },
           '50%': {
             'background-size': '200% 200%',
-            'background-position': 'right center'
+            'background-position': 'right center',
           },
         },
       },
@@ -64,4 +64,4 @@ module.exports = {
     },
   },
   plugins: [],
-}
+};

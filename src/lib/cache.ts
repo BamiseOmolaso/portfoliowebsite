@@ -8,7 +8,8 @@ class Cache {
   private cache: Map<string, CacheItem<any>>;
   private defaultTTL: number;
 
-  private constructor(ttl: number = 5 * 60 * 1000) { // 5 minutes default
+  private constructor(ttl: number = 5 * 60 * 1000) {
+    // 5 minutes default
     this.cache = new Map();
     this.defaultTTL = ttl;
   }
@@ -69,4 +70,4 @@ export const cache = Cache.getInstance();
 //   cache.set('projects', newData, 60 * 60 * 1000); // 1 hour
 //   return newData;
 // }
-// return data; 
+// return data;

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
 import { motion } from 'framer-motion';
 import DOMPurify from 'dompurify';
 
@@ -30,10 +29,6 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -108,11 +103,19 @@ export default function ContactPage() {
         message: DOMPurify.sanitize(formData.message),
       };
 
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert([{ ...sanitizedData, created_at: new Date().toISOString() }]);
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sanitizedData),
+      });
 
-      if (error) throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message');
+      }
 
       setSuccess(true);
       setFormData({
@@ -122,21 +125,19 @@ export default function ContactPage() {
         message: '',
       });
     } catch (err) {
-      setError('Failed to send message. Please try again later.');
+      setError(err instanceof Error ? err.message : 'Failed to send message. Please try again later.');
       console.error('Error sending message:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
     if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
+      setErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
 
@@ -180,9 +181,7 @@ export default function ContactPage() {
                   errors.name ? 'border-red-500' : 'border-gray-700'
                 } rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500`}
               />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-              )}
+              {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
             </div>
 
             <div>
@@ -199,9 +198,7 @@ export default function ContactPage() {
                   errors.email ? 'border-red-500' : 'border-gray-700'
                 } rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500`}
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-              )}
+              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
             </div>
 
             <div>
@@ -218,9 +215,7 @@ export default function ContactPage() {
                   errors.subject ? 'border-red-500' : 'border-gray-700'
                 } rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500`}
               />
-              {errors.subject && (
-                <p className="mt-1 text-sm text-red-500">{errors.subject}</p>
-              )}
+              {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject}</p>}
             </div>
 
             <div>
@@ -237,9 +232,7 @@ export default function ContactPage() {
                   errors.message ? 'border-red-500' : 'border-gray-700'
                 } rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500`}
               />
-              {errors.message && (
-                <p className="mt-1 text-sm text-red-500">{errors.message}</p>
-              )}
+              {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
             </div>
 
             <button
@@ -254,4 +247,4 @@ export default function ContactPage() {
       </div>
     </div>
   );
-} 
+}

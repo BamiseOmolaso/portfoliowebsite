@@ -46,7 +46,7 @@ const Footer = () => {
   const quickLinks = [
     { name: 'Home', href: '/' },
     { name: 'Blog', href: '/blog' },
-    { name: 'Portfolio', href: '/portfolio' },
+    { name: 'Projects', href: '/projects' },
     { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' },
     { name: 'Newsletter', href: '/newsletter' },
@@ -60,7 +60,10 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Contact</h3>
             <p className="text-gray-400">
-              Email: <a href="mailto:davidbams3@gmail.com" className="hover:text-purple-400">davidbams3@gmail.com</a>
+              Email:{' '}
+              <a href="mailto:davidbams3@gmail.com" className="hover:text-purple-400">
+                davidbams3@gmail.com
+              </a>
             </p>
           </div>
 
@@ -68,7 +71,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              {quickLinks.map((link) => (
+              {quickLinks.map(link => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
@@ -85,7 +88,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Connect</h3>
             <div className="flex space-x-4">
-              {socialLinks.map((link) => (
+              {socialLinks.map(link => (
                 <a
                   key={link.name}
                   href={link.href}
@@ -102,14 +105,12 @@ const Footer = () => {
           {/* Newsletter */}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Newsletter</h3>
-            <p className="text-gray-400 mb-4">
-              Subscribe to get the latest updates and insights.
-            </p>
+            <p className="text-gray-400 mb-4">Subscribe to get the latest updates and insights.</p>
             <form onSubmit={handleSubscribe} className="space-y-2">
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 required
@@ -124,7 +125,9 @@ const Footer = () => {
                 {status === 'subscribing' ? 'Subscribing...' : 'Subscribe'}
               </button>
               {message && (
-                <p className={`text-sm ${status === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+                <p
+                  className={`text-sm ${status === 'success' ? 'text-green-400' : 'text-red-400'}`}
+                >
                   {message}
                 </p>
               )}
@@ -133,11 +136,13 @@ const Footer = () => {
         </div>
 
         <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Dr. Oluwabamise David Omolaso. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} Dr. Oluwabamise David Omolaso. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
   );
 };
 
-export default Footer; 
+export default Footer;

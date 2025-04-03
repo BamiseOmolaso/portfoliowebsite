@@ -16,11 +16,9 @@ export default function ContactForm() {
   }>({ type: null, message: '' });
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,10 +82,7 @@ export default function ContactForm() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-gray-300 mb-2"
-          >
+          <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
             Name
           </label>
           <input
@@ -102,10 +97,7 @@ export default function ContactForm() {
         </div>
 
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-300 mb-2"
-          >
+          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
             Email
           </label>
           <input
@@ -121,10 +113,7 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label
-          htmlFor="subject"
-          className="block text-sm font-medium text-gray-300 mb-2"
-        >
+        <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-2">
           Subject
         </label>
         <input
@@ -139,10 +128,7 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label
-          htmlFor="message"
-          className="block text-sm font-medium text-gray-300 mb-2"
-        >
+        <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
           Message
         </label>
         <textarea
@@ -165,4 +151,4 @@ export default function ContactForm() {
       </button>
     </motion.form>
   );
-} 
+}

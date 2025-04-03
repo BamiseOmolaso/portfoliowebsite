@@ -74,7 +74,7 @@ export default function DashboardContent() {
           <div className="text-gray-400">No messages yet</div>
         ) : (
           <div className="space-y-4">
-            {messages.map((message) => (
+            {messages.map(message => (
               <motion.div
                 key={message.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -84,7 +84,9 @@ export default function DashboardContent() {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h2 className="text-xl font-semibold text-white">{message.subject}</h2>
-                    <p className="text-gray-400">{message.name} &lt;{message.email}&gt;</p>
+                    <p className="text-gray-400">
+                      {message.name} &lt;{message.email}&gt;
+                    </p>
                   </div>
                   <span className="text-sm text-gray-500">
                     {new Date(message.created_at).toLocaleDateString()}
@@ -98,4 +100,4 @@ export default function DashboardContent() {
       </div>
     </div>
   );
-} 
+}

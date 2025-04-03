@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -22,13 +21,23 @@ export default function LoginPage() {
   useEffect(() => {
     // Check if user is already logged in
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        router.push('/dashboard');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          setError('Failed to check session: ' + error.message);
+          return;
+        }
+
+        if (session) {
+          router.push('/dashboard');
+        }
+      } catch (err) {
+        setError('Failed to check session');
       }
     };
     checkSession();
-  }, []);
+  }, [router, supabase.auth]);
 
   useEffect(() => {
     // Reset failed attempts after 15 minutes
@@ -69,7 +78,21 @@ export default function LoginPage() {
     }
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // Test database connection first
+      try {
+        const { error: testError } = await supabase
+          .from('blog_posts')
+          .select('count')
+          .limit(1);
+
+        if (testError) {
+          throw new Error('Database connection failed: ' + testError.message);
+        }
+      } catch (testErr) {
+        throw new Error('Failed to connect to the database');
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -80,7 +103,7 @@ export default function LoginPage() {
       }
 
       router.push('/dashboard');
-    } catch (err: any) {
+    } catch (err: Error) {
       setError(err.message || 'Failed to login');
     } finally {
       setLoading(false);
@@ -156,4 +179,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+}
