@@ -1,7 +1,5 @@
-import { checkAuth } from '@/lib/auth';
 import DashboardContent from './DashboardContent';
 
-export default async function DashboardPage() {
-  await checkAuth();
+export default function DashboardPage() {
   return <DashboardContent />;
 }

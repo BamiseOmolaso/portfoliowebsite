@@ -431,7 +431,7 @@ export default function BlogPostForm({ params }: { params: { action: string; id:
               <label className="block text-sm font-medium text-gray-300 mb-2">Content</label>
               <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
                 <Editor
-                  value={post.content}
+                  content={post.content}
                   onChange={handleContentChange}
                   onSave={() => handleSubmit}
                   onPreview={() => setIsPreview(!isPreview)}

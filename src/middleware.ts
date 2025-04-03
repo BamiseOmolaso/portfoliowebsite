@@ -1,6 +1,5 @@
-import { createServerClient, CookieOptions } from '@supabase/ssr';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
 // Verify environment variables are set
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -11,11 +10,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next();
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
   const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name: string) {
@@ -39,39 +42,22 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+  const { data: { session } } = await supabase.auth.getSession();
 
-    // If user is not signed in and trying to access protected routes
-    if (!session && request.nextUrl.pathname.startsWith('/dashboard')) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    // If user is signed in and trying to access login page
-    if (session && request.nextUrl.pathname === '/login') {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-
-    return response;
-  } catch (error) {
-    console.error('Middleware error:', error);
+  // If the user is not logged in and trying to access a protected route, redirect to login
+  if (!session && request.nextUrl.pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
+
+  // If the user is logged in and trying to access login page, redirect to dashboard
+  if (session && request.nextUrl.pathname === '/login') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  return response;
 }
 
 // Configure which routes to run middleware on
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - login page
-     */
-    '/((?!_next/static|_next/image|favicon.ico|login|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/dashboard/:path*', '/login'],
 };
