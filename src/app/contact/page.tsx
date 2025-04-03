@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import DOMPurify from 'dompurify';
+import { useRouter } from 'next/navigation';
 
 interface FormData {
   name: string;
@@ -19,6 +20,7 @@ interface FormErrors {
 }
 
 export default function ContactPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -124,6 +126,11 @@ export default function ContactPage() {
         subject: '',
         message: '',
       });
+
+      // Redirect to home page after 2 seconds
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send message. Please try again later.');
       console.error('Error sending message:', err);
@@ -156,7 +163,7 @@ export default function ContactPage() {
 
           {success && (
             <div className="mb-6 p-4 bg-green-500/10 border border-green-500 text-green-500 rounded">
-              Message sent successfully!
+              Message sent successfully! Redirecting to home page...
             </div>
           )}
 

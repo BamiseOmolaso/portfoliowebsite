@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 const Newsletter = () => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [status, setStatus] = useState<'idle' | 'subscribing' | 'success' | 'error'>('idle');
@@ -33,6 +35,11 @@ const Newsletter = () => {
       setMessage('Thank you for subscribing to our newsletter!');
       setEmail('');
       setName('');
+      
+      // Redirect to home page after 2 seconds
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
     } catch (error) {
       setStatus('error');
       setMessage(error instanceof Error ? error.message : 'Failed to subscribe');
@@ -52,6 +59,7 @@ const Newsletter = () => {
           {status === 'success' ? (
             <div className="bg-green-500/10 border border-green-500 text-green-500 px-4 py-3 rounded">
               {message}
+              <p className="mt-2 text-sm">Redirecting to home page...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">

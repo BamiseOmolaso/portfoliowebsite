@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function ContactForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -43,7 +45,7 @@ export default function ContactForm() {
 
       setStatus({
         type: 'success',
-        message: 'Message sent successfully!',
+        message: 'Message sent successfully! Redirecting to home page...',
       });
       setFormData({
         name: '',
@@ -51,6 +53,11 @@ export default function ContactForm() {
         subject: '',
         message: '',
       });
+
+      // Redirect to home page after 2 seconds
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
     } catch (error) {
       setStatus({
         type: 'error',

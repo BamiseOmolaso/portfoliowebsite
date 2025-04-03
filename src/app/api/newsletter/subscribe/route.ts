@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { withRateLimit, apiLimiter } from '@/lib/rate-limit';
-import { sendWelcomeEmail } from '@/lib/resend';
+import { sendWelcomeEmail, sendAdminNotification } from '@/lib/resend';
 
 export const POST = withRateLimit(apiLimiter, 'newsletter-subscribe', async (request: Request) => {
   try {
@@ -48,12 +48,20 @@ export const POST = withRateLimit(apiLimiter, 'newsletter-subscribe', async (req
       return NextResponse.json({ error: 'Failed to subscribe to newsletter' }, { status: 500 });
     }
 
-    // Send welcome email
+    // Send welcome email to subscriber
     try {
       await sendWelcomeEmail(email, name);
     } catch (err: unknown) {
       console.error('Welcome email error:', err instanceof Error ? err.message : err);
       // Don't fail the subscription if the welcome email fails
+    }
+
+    // Send notification to admin
+    try {
+      await sendAdminNotification(email, name);
+    } catch (err: unknown) {
+      console.error('Admin notification error:', err instanceof Error ? err.message : err);
+      // Don't fail the subscription if the admin notification fails
     }
 
     return NextResponse.json({ message: 'Successfully subscribed to newsletter' }, { status: 200 });
