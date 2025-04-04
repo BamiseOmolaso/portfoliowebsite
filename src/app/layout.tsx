@@ -4,7 +4,8 @@ import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { validateEnv } from '@/lib/config';
+import { validateEnv } from '@/config/env';
+import CookieConsent from '@/components/CookieConsent';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Navbar />
           <main className="min-h-screen pt-16">{children}</main>
           <Footer />
+          <CookieConsent />
         </ErrorBoundary>
       </body>
     </html>

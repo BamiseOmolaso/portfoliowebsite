@@ -30,7 +30,7 @@ import {
   Eye,
   Save,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { EditorButton } from './EditorButton';
 
 interface EditorProps {
@@ -39,6 +39,7 @@ interface EditorProps {
   placeholder?: string;
   onSave?: () => void;
   onPreview?: () => void;
+  className?: string;
 }
 
 const lowlight = createLowlight();
@@ -49,9 +50,11 @@ export default function Editor({
   placeholder,
   onSave,
   onPreview,
+  className = '',
 }: EditorProps): React.ReactElement {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -87,7 +90,7 @@ export default function Editor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-invert max-w-none focus:outline-none min-h-[400px] p-4',
+        class: `prose prose-invert max-w-none focus:outline-none min-h-[400px] p-4 ${className}`,
       },
     },
     immediatelyRender: false,
@@ -99,58 +102,89 @@ export default function Editor({
     }
   }, [content, editor]);
 
-  if (!editor) {
-    return <div />;
-  }
+  const validateUrl = useCallback((url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
 
-  const addImage = (): void => {
+  const addImage = useCallback((): void => {
     try {
       const url = window.prompt('Enter the URL of the image:');
       if (!url) return;
 
-      // Basic URL validation
-      try {
-        new URL(url);
-      } catch (err) {
+      if (!validateUrl(url)) {
         throw new Error('Please enter a valid URL');
       }
 
-      editor.chain().focus().setImage({ src: url }).run();
+      editor?.chain().focus().setImage({ src: url }).run();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to add image';
+      setError(errorMessage);
       console.error('Error adding image:', err);
-      alert(errorMessage);
     }
-  };
+  }, [editor, validateUrl]);
 
-  const addLink = (): void => {
+  const addLink = useCallback((): void => {
     try {
       const url = window.prompt('Enter the URL:');
       if (!url) return;
 
-      // Basic URL validation
-      try {
-        new URL(url);
-      } catch (err) {
+      if (!validateUrl(url)) {
         throw new Error('Please enter a valid URL');
       }
 
-      editor.chain().focus().setLink({ href: url }).run();
+      editor?.chain().focus().setLink({ href: url }).run();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to add link';
+      setError(errorMessage);
       console.error('Error adding link:', err);
     }
-  };
+  }, [editor, validateUrl]);
 
-  const togglePreview = () => {
+  const togglePreview = useCallback(() => {
     setIsPreview(!isPreview);
     if (onPreview) {
       onPreview();
     }
-  };
+  }, [isPreview, onPreview]);
+
+  // Add keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!editor) return;
+
+      // Save: Ctrl/Cmd + S
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (onSave) onSave();
+      }
+
+      // Preview: Ctrl/Cmd + P
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        togglePreview();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editor, onSave, togglePreview]);
+
+  if (!editor) {
+    return <div className="min-h-[400px] bg-gray-900 rounded-lg border border-gray-700" />;
+  }
 
   return (
     <div className="border border-gray-700 rounded-lg bg-gray-900">
+      {error && (
+        <div className="bg-red-500/10 border-b border-red-500 text-red-500 px-4 py-2 text-sm">
+          {error}
+        </div>
+      )}
       <div className="flex flex-wrap gap-2 p-2 border-b border-gray-800">
         {/* Text Formatting */}
         <div className="flex gap-1 border-r border-gray-800 pr-2">
@@ -158,13 +192,13 @@ export default function Editor({
             icon={Bold}
             onClick={() => editor.chain().focus().toggleBold().run()}
             isActive={editor.isActive('bold')}
-            title="Bold"
+            title="Bold (Ctrl+B)"
           />
           <EditorButton
             icon={Italic}
             onClick={() => editor.chain().focus().toggleItalic().run()}
             isActive={editor.isActive('italic')}
-            title="Italic"
+            title="Italic (Ctrl+I)"
           />
           <EditorButton
             icon={Strikethrough}
@@ -268,19 +302,30 @@ export default function Editor({
           <EditorButton
             icon={Undo}
             onClick={() => editor.chain().focus().undo().run()}
-            title="Undo"
+            title="Undo (Ctrl+Z)"
           />
           <EditorButton
             icon={Redo}
             onClick={() => editor.chain().focus().redo().run()}
-            title="Redo"
+            title="Redo (Ctrl+Y)"
           />
         </div>
 
         {/* Preview & Save */}
         <div className="flex gap-1 ml-auto">
-          <EditorButton icon={Eye} onClick={togglePreview} isActive={isPreview} title="Preview" />
-          {onSave && <EditorButton icon={Save} onClick={onSave} title="Save" />}
+          <EditorButton
+            icon={Eye}
+            onClick={togglePreview}
+            isActive={isPreview}
+            title="Preview (Ctrl+P)"
+          />
+          {onSave && (
+            <EditorButton
+              icon={Save}
+              onClick={onSave}
+              title="Save (Ctrl+S)"
+            />
+          )}
         </div>
       </div>
       <EditorContent editor={editor} />

@@ -3,13 +3,22 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { withRateLimit, contactFormLimiter } from '@/lib/rate-limit';
+import { sanitizeHtml, sanitizeEmail, sanitizeSubject, sanitizeText } from '@/lib/sanitize';
+
+export const dynamic = 'force-dynamic';
 
 export const POST = withRateLimit(contactFormLimiter, 'contact-form', async (request: Request) => {
   try {
     const { name, email, subject, message } = await request.json();
 
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeEmail(email);
+    const sanitizedSubject = sanitizeSubject(subject);
+    const sanitizedMessage = sanitizeText(message);
+    const sanitizedName = sanitizeText(name);
+
     // Validate required fields
-    if (!name || !email || !subject || !message) {
+    if (!sanitizedName || !sanitizedEmail || !sanitizedSubject || !sanitizedMessage) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
@@ -18,7 +27,7 @@ export const POST = withRateLimit(contactFormLimiter, 'contact-form', async (req
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(sanitizedEmail)) {
       return NextResponse.json(
         { error: 'Invalid email format' },
         { status: 400 }
@@ -33,10 +42,10 @@ export const POST = withRateLimit(contactFormLimiter, 'contact-form', async (req
       .from('contact_messages')
       .insert([
         {
-          name,
-          email,
-          subject,
-          message
+          name: sanitizedName,
+          email: sanitizedEmail,
+          subject: sanitizedSubject,
+          message: sanitizedMessage
         }
       ]);
 
@@ -52,21 +61,21 @@ export const POST = withRateLimit(contactFormLimiter, 'contact-form', async (req
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     // Generate a personalized response based on the subject and message content
-    const responseMessage = generatePersonalizedResponse(name, subject, message);
+    const responseMessage = generatePersonalizedResponse(sanitizedName, sanitizedSubject, sanitizedMessage);
 
     // Send email notification to admin
     try {
       await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+        from: `Bamise Omolaso <${process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'}>`,
         to: process.env.CONTACT_EMAIL || 'your-email@example.com',
-        subject: `New Contact Form Submission: ${subject}`,
-        html: `
+        subject: `New Contact Form Submission: ${sanitizedSubject}`,
+        html: sanitizeHtml(`
           <h2>New Contact Form Submission</h2>
-          <p><strong>From:</strong> ${name} (${email})</p>
-          <p><strong>Subject:</strong> ${subject}</p>
+          <p><strong>From:</strong> ${sanitizedName} (${sanitizedEmail})</p>
+          <p><strong>Subject:</strong> ${sanitizedSubject}</p>
           <p><strong>Message:</strong></p>
-          <p>${message.replace(/\n/g, '<br>')}</p>
-        `
+          <p>${sanitizedMessage.replace(/\n/g, '<br>')}</p>
+        `)
       });
     } catch (err: unknown) {
       console.error('Admin email error:', err instanceof Error ? err.message : err);
@@ -76,10 +85,10 @@ export const POST = withRateLimit(contactFormLimiter, 'contact-form', async (req
     // Send response email to the user
     try {
       await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
-        to: email,
-        subject: `Re: ${subject}`,
-        html: responseMessage
+        from: `Bamise Omolaso <${process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'}>`,
+        to: sanitizedEmail,
+        subject: `Re: ${sanitizedSubject}`,
+        html: sanitizeHtml(responseMessage)
       });
     } catch (err: unknown) {
       console.error('Response email error:', err instanceof Error ? err.message : err);
@@ -151,7 +160,7 @@ function generatePersonalizedResponse(name: string, subject: string, message: st
       
       ${responseContent}
       
-      <p>Best regards,<br>Oluwabamise Omolaso</p>
+      <p>Best regards,<br>Bamise Omolaso</p>
       
       <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
         <p>This is an automated response to your contact form submission. I'll respond more personally soon.</p>

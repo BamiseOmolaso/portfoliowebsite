@@ -27,33 +27,48 @@ interface Project {
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .order('published_at', { ascending: false });
+
+        if (error) throw error;
+
+        const normalizedData = data.map(project => ({
+          ...project,
+          technologies: project.technologies || [],
+          tags: project.technologies || []
+        }));
+
+        setProjects(normalizedData);
+        
+        // Get unique tags
+        const tags = new Set<string>();
+        normalizedData.forEach(project => {
+          project.technologies.forEach((tag: string) => tags.add(tag));
+        });
+        setAvailableTags(Array.from(tags));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProjects();
   }, []);
-
-  const fetchProjects = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setProjects(data || []);
-    } catch (err) {
-      console.error('Error fetching projects:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Get all unique tags from projects
   const allTags = Array.from(
@@ -61,8 +76,8 @@ export default function ProjectsPage() {
   ).sort();
 
   // Filter projects based on selected tag
-  const filteredProjects = selectedTag
-    ? projects.filter(project => project.technologies.includes(selectedTag))
+  const filteredProjects = selectedTags.length > 0
+    ? projects.filter(project => selectedTags.every(tag => project.technologies.includes(tag)))
     : projects;
 
   if (loading) {
@@ -92,9 +107,9 @@ export default function ProjectsPage() {
         {/* Tags Filter */}
         <div className="flex flex-wrap justify-center gap-2 mb-12">
           <button
-            onClick={() => setSelectedTag(null)}
+            onClick={() => setSelectedTags([])}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedTag === null
+              selectedTags.length === 0
                 ? 'bg-purple-600 text-white'
                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
             }`}
@@ -104,9 +119,15 @@ export default function ProjectsPage() {
           {allTags.map(tag => (
             <button
               key={tag}
-              onClick={() => setSelectedTag(tag)}
+              onClick={() => {
+                if (selectedTags.includes(tag)) {
+                  setSelectedTags(selectedTags.filter(t => t !== tag));
+                } else {
+                  setSelectedTags([...selectedTags, tag]);
+                }
+              }}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedTag === tag
+                selectedTags.includes(tag)
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}

@@ -8,13 +8,17 @@ A modern, responsive portfolio website showcasing Dr. Oluwabamise David Omolaso'
 - Responsive design for all devices
 - Smooth animations and transitions
 - Blog section for sharing insights
-- Portfolio showcase
-- Contact form with email notifications
-- Newsletter subscription with admin notifications
+- Portfolio showcase with tag filtering
+- Contact form with email notifications and spam protection
+- Newsletter subscription with admin notifications and preferences management
 - About section with experience timeline
 - Downloadable resume
-- Performance monitoring
-- Dashboard for managing newsletters and subscribers
+- Performance monitoring dashboard
+- Admin dashboard for managing newsletters and subscribers
+- Cookie consent management
+- reCAPTCHA integration for form protection
+- Rate limiting and security measures
+- Email authentication and verification
 
 ## Technologies Used
 
@@ -28,6 +32,9 @@ A modern, responsive portfolio website showcasing Dr. Oluwabamise David Omolaso'
 - TipTap for rich text editing
 - DOMPurify for HTML sanitization
 - Zod for schema validation
+- Google reCAPTCHA for form protection
+- js-cookie for cookie management
+- Upstash Redis for rate limiting
 
 ## Getting Started
 
@@ -35,6 +42,10 @@ A modern, responsive portfolio website showcasing Dr. Oluwabamise David Omolaso'
 
 - Node.js 18.x or later
 - npm or yarn
+- Supabase account
+- Resend account
+- Google reCAPTCHA keys
+- Upstash Redis account (for rate limiting)
 
 ### Installation
 
@@ -69,6 +80,10 @@ CONTACT_EMAIL=your_contact_email
 # Rate Limiting
 UPSTASH_REDIS_REST_URL=your_upstash_redis_url
 UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
+
+# reCAPTCHA
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
+RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key
 ```
 
 4. Run the development server:
@@ -91,12 +106,19 @@ src/
 │   │   ├── contact/       # Contact form API
 │   │   ├── newsletter/    # Newsletter subscription API
 │   │   ├── performance/   # Performance monitoring API
-│   │   └── subscribers/   # Subscriber management API
+│   │   ├── subscribers/   # Subscriber management API
+│   │   └── email-auth/    # Email authentication API
 │   ├── blog/              # Blog section
 │   ├── contact/           # Contact page
-│   ├── dashboard/         # Admin dashboard
-│   │   └── newsletters/   # Newsletter management
+│   ├── admin/             # Admin dashboard
+│   │   ├── newsletters/   # Newsletter management
+│   │   ├── performance/   # Performance metrics
+│   │   └── email-auth/    # Email authentication
+│   ├── newsletter/        # Newsletter pages
+│   │   ├── preferences/   # Subscriber preferences
+│   │   └── unsubscribe/   # Unsubscribe page
 │   ├── portfolio/         # Portfolio section
+│   ├── privacy-policy/    # Privacy policy page
 │   ├── globals.css        # Global styles
 │   ├── layout.tsx         # Root layout
 │   └── page.tsx           # Home page
@@ -105,26 +127,53 @@ src/
 │   │   ├── Navbar.tsx    # Navigation bar
 │   │   └── Footer.tsx    # Footer component
 │   ├── ContactForm.tsx   # Contact form component
-│   └── Newsletter.tsx    # Newsletter subscription component
+│   ├── Newsletter.tsx    # Newsletter subscription component
+│   ├── CookieConsent.tsx # Cookie consent component
+│   └── ErrorBoundary.tsx # Error boundary component
 ├── lib/                  # Utility functions
 │   ├── resend.ts         # Email sending utilities
-│   └── supabase.ts       # Supabase client utilities
+│   ├── supabase.ts       # Supabase client utilities
+│   ├── security.ts       # Security utilities
+│   ├── rate-limit.ts     # Rate limiting utilities
+│   ├── sanitize.ts       # Input sanitization utilities
+│   └── cache.ts          # Caching utilities
 ├── types/                # TypeScript type definitions
 │   ├── newsletter.d.ts   # Newsletter types
 │   ├── html-to-text.d.ts # HTML to text types
-│   └── jsdom.d.ts        # JSDOM types
+│   ├── jsdom.d.ts        # JSDOM types
+│   └── global.d.ts       # Global type definitions
 └── public/               # Static assets
 ```
 
 ## Recent Updates
 
-- **Newsletter Subscription**: Added a newsletter subscription feature with email notifications for both subscribers and admin
-- **Contact Form Improvements**: Enhanced contact form with redirection to home page after successful submission
-- **TypeScript Improvements**: Added custom type definitions for third-party libraries and improved type safety
-- **Performance Monitoring**: Implemented performance monitoring for Core Web Vitals
-- **Admin Dashboard**: Added a dashboard for managing newsletters and subscribers
-- **Email Notifications**: Integrated Resend for sending welcome emails and admin notifications
-- **Security Enhancements**: Added HTML sanitization for user inputs and rate limiting for API routes
+- **Security Enhancements**:
+  - Added reCAPTCHA protection for forms
+  - Implemented rate limiting for API routes
+  - Enhanced input sanitization
+  - Added IP blacklisting for suspicious activity
+  - Implemented cookie consent management
+
+- **Newsletter System**:
+  - Added subscriber preferences management
+  - Implemented unsubscribe functionality with feedback
+  - Enhanced email authentication
+  - Added performance metrics tracking
+  - Improved admin dashboard for newsletter management
+
+- **Performance Improvements**:
+  - Added caching strategies
+  - Optimized database queries
+  - Implemented error boundaries
+  - Enhanced loading states
+  - Added performance monitoring
+
+- **User Experience**:
+  - Added cookie consent banner
+  - Enhanced form validation
+  - Improved error handling
+  - Added success notifications
+  - Enhanced mobile responsiveness
 
 ## Customization
 
@@ -134,12 +183,14 @@ src/
 4. Update the social media links in the Footer component
 5. Add your resume PDF to the `public` directory
 6. Configure your email templates in the `lib/resend.ts` file
+7. Update reCAPTCHA keys in `.env.local`
+8. Configure rate limiting settings in `lib/rate-limit.ts`
 
 ## Deployment
 
-The site can be deployed to any platform that supports Next.js applications, such as:
+The site is deployed on Vercel at [https://oluwabamiseomolaso.vercel.app/](https://oluwabamiseomolaso.vercel.app/)
 
-- Vercel (recommended)
+Other deployment options:
 - Netlify
 - AWS Amplify
 - Google Cloud Platform

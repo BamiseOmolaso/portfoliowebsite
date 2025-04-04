@@ -219,8 +219,8 @@ export default function Home() {
               >
                 <a
                   href={`https://www.youtube.com/watch?v=${video.videoId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
                   className="block relative aspect-video bg-gray-900"
                 >
                   <div className="absolute inset-0 flex items-center justify-center bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
@@ -233,7 +233,7 @@ export default function Home() {
                     </svg>
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60"></div>
-                  <Image
+            <Image
                     src={getThumbnailUrl(video.videoId)}
                     alt={video.title}
                     fill
@@ -260,8 +260,8 @@ export default function Home() {
           <div className="text-center mt-12">
             <a
               href="https://www.youtube.com/@bamiseteachescloud/videos"
-              target="_blank"
-              rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
               className="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition-colors"
             >
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -375,7 +375,7 @@ export default function Home() {
                 className="bg-gray-800 rounded-lg overflow-hidden group hover:transform hover:scale-105 transition-all duration-300"
               >
                 <div className="relative h-48 overflow-hidden">
-                  <Image
+          <Image
                     src={project.cover_image}
                     alt={project.title}
                     fill
@@ -420,8 +420,8 @@ export default function Home() {
                     {project.github_url && (
                       <a
                         href={project.github_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
                         className="text-purple-400 hover:text-purple-300"
                       >
                         GitHub

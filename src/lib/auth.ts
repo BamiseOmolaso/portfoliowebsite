@@ -1,127 +1,49 @@
-import { createServerClient, CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+// Re-export client auth utilities
+export {
+  createBrowserClient,
+  signIn,
+  signOut,
+  refreshSession,
+  getSession as getClientSession
+} from './client-auth';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Re-export server auth utilities
+export {
+  createClient,
+  getSession as getServerSession,
+  getProfile,
+  checkAdminAccess
+} from './server-auth';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Required environment variables are not set');
+// Common auth types
+export interface AuthSession {
+  user: {
+    id: string;
+    email: string;
+    role?: string;
+  };
+  access_token: string;
+  refresh_token: string;
+  expires_at: number;
 }
 
-const SUPABASE_URL = supabaseUrl as string;
-const SUPABASE_ANON_KEY = supabaseAnonKey as string;
-
-export async function checkAuth() {
-  try {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookies().get(name)?.value;
-          },
-        },
-      }
-    );
-
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) throw error;
-    if (!session) {
-      redirect('/login');
-    }
-
-    return session;
-  } catch (err: unknown) {
-    console.error('Auth error:', err instanceof Error ? err.message : err);
-    redirect('/login');
-  }
+export interface AuthProfile {
+  id: string;
+  email: string;
+  role: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export function createClient() {
-  const cookieStore = cookies();
-
-  return createServerClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        get(name: string) {
-          // 🔧 ADDED: parse JSON safely
-          try {
-            const cookie = cookieStore.get(name)?.value;
-            return cookie ? JSON.parse(cookie) : undefined;
-          } catch (err) {
-            console.error('Error parsing cookie:', err);
-            return undefined;
-          }
-        },
-        set(name: string, value: any, options: CookieOptions) {
-          // 🔧 CHANGED: store as JSON
-          try {
-            cookieStore.set({ name, value: JSON.stringify(value), ...options });
-          } catch (error) {
-            console.error('Error setting cookie:', error);
-          }
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value: '', expires: new Date(0), ...options });
-          } catch (error) {
-            console.error('Error removing cookie:', error);
-          }
-        },
-      },
-    }
-  );
+// Common auth utilities
+export function isAuthenticated(session: AuthSession | null): boolean {
+  return !!session && session.expires_at > Date.now() / 1000;
 }
 
-export async function signIn(email: string, password: string) {
-  try {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookies().get(name)?.value;
-          },
-        },
-      }
-    );
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-    return data;
-  } catch (err: unknown) {
-    console.error('Sign in error:', err instanceof Error ? err.message : err);
-    throw err;
-  }
+export function hasRole(session: AuthSession | null, role: string): boolean {
+  return isAuthenticated(session) && session?.user.role === role;
 }
 
-export async function signOut() {
-  try {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookies().get(name)?.value;
-          },
-        },
-      }
-    );
-
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  } catch (err: unknown) {
-    console.error('Sign out error:', err instanceof Error ? err.message : err);
-    throw err;
-  }
-}
+export function isAdmin(session: AuthSession | null): boolean {
+  return hasRole(session, 'admin');
+} 

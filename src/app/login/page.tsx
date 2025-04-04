@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createBrowserClient } from '@/lib/client-auth';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -13,10 +13,7 @@ export default function LoginPage() {
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState<Date | null>(null);
   const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createBrowserClient();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -30,7 +27,23 @@ export default function LoginPage() {
         }
 
         if (session) {
-          router.push('/dashboard');
+          // Check if user is an admin
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileError) {
+            setError('Failed to check user role');
+            return;
+          }
+
+          if (profile && profile.role === 'admin') {
+            router.replace('/admin');
+          } else {
+            router.replace('/');
+          }
         }
       } catch (err) {
         setError('Failed to check session');
@@ -102,7 +115,23 @@ export default function LoginPage() {
         throw error;
       }
 
-      router.push('/dashboard');
+      // Check if user is an admin
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError) {
+        throw new Error('Failed to check user role');
+      }
+
+      if (!profile || profile.role !== 'admin') {
+        router.replace('/');
+        return;
+      }
+
+      router.replace('/admin');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to login');
     } finally {
