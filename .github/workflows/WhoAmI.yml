@@ -1,13 +1,24 @@
 name: WhoAmI
 on: [workflow_dispatch]
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    permissions: { id-token: write, contents: read }
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
+
+      - name: Precheck OIDC envs
+        run: |
+          echo "ACTIONS_ID_TOKEN_REQUEST_URL=${ACTIONS_ID_TOKEN_REQUEST_URL:-missing}"
+          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" ]; then echo "Token: missing"; else echo "Token: present"; fi
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: gh-actions-${{ github.run_id }}
           aws-region: us-east-1
+
       - run: aws sts get-caller-identity
